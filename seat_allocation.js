@@ -2,9 +2,10 @@ const fs = require("fs");
 const Papa = require("papaparse");
 
 const { shuffleArray, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour } = require("./utils")
+const { elitism } = require("./selection")
 
-const POPULATION_SIZE = 5;
-const GENERATION_LIMIT = 1;
+const POPULATION_SIZE = 2;
+const GENERATION_LIMIT = 2;
 // const mutationProbability = 0.03
 
 // Read subject details from csv file
@@ -24,6 +25,11 @@ const numberOfSeats = getNumberOfSeats(roomDetails.data)
 csv = fs.readFileSync("student_details.csv");
 const studentDetails = Papa.parse(csv.toString());
 const numberOfStudents = studentDetails.data.length
+
+if (numberOfSeats < numberOfStudents) {
+  console.log("Insufficient number of seats");
+  return;
+}
 
 const allotedSeats = [];
 
@@ -105,10 +111,15 @@ currentGeneration = 1;
 // Start iterating through generations
 while (currentGeneration <= GENERATION_LIMIT) {
   // Calculate fitness of each chromosome (solution) in population and store
-  const fitness = population.map(solution => fitnessValue(solution))
-  console.log(fitness)
-  // ! SELECTION
-  // Send top 10% of population as it is to next generation
+  const populationWithCalculatedFitness = population.map(solution => fitnessValue(solution))
+
+  // Sort solutions in a population based on fitness
+  populationWithCalculatedFitness.sort((a, b) => {
+    return b.fitness - a.fitness;
+  })
+
+  // ! SELECTION (build mating pool)
+  const newPopulation = elitism(populationWithCalculatedFitness, 20, POPULATION_SIZE);
 
   // Fill rest of the population using crossover and mutation
   // Select 2 parents for mating
