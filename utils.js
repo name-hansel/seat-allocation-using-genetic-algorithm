@@ -1,3 +1,7 @@
+/**
+ * Shuffles an array in place
+ * @param {array} array Array to be shuffled
+ */
 function shuffleArray(array) {
   for (var i = array.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
@@ -7,6 +11,10 @@ function shuffleArray(array) {
   }
 }
 
+/**
+ * Calculates sum of elements in an array
+ * @param {array} array Array whose sum is to be calculated
+ */
 function getArraySum(array) {
   let sum = 0;
   for (let i = 0; i < array.length; i++) {
@@ -15,6 +23,11 @@ function getArraySum(array) {
   return sum;
 }
 
+/**
+ * Returns an object containing dissimilarity-factor of each subject pair
+ * @param {array} array 2D array containing similarity-factor for each subject pair
+ * @returns {object}
+ */
 function getSubjectDissimilarity(data) {
   const numberOfSubjects = data[0].length - 1;
   const subjectDissimilarityData = {};
@@ -30,6 +43,10 @@ function getSubjectDissimilarity(data) {
   return subjectDissimilarityData;
 }
 
+/**
+ * Calculates total number of seats in all rooms
+ * @param {array} data Array containing another array which defines number of rows and columns in a room
+ */
 function getNumberOfSeats(data) {
   let numberOfSeats = 0;
   for (let i = 0; i < data.length; i++) {
@@ -38,10 +55,22 @@ function getNumberOfSeats(data) {
   return numberOfSeats
 }
 
+/**
+ * Calculates distance between 2 seats
+ * @param {array} v1 Array containing row and column number of seat 1
+ * @param {array} v2 Array containing row and column number of seat 2
+ */
 function getDistanceBetweenNeighbours(v1, v2) {
   return Math.sqrt(Math.pow((v1[0] - v2[0]), 2) + Math.pow((v1[1] - v2[1]), 2))
 }
 
+/**
+ * Gets student details about a particular neighbour seat using room no., row no., and column no.
+ * @param {array} chromosome Array containing data about all seats
+ * @param {number} room Room number of seat
+ * @param {number} row Row number of seat
+ * @param {number} column Column number of seat
+ */
 function getNeighbourDetails(chromosome, room, row, column) {
   for (let i = 0; i < chromosome.length; i++) {
     if (chromosome[i][0] !== room) continue;
@@ -51,6 +80,12 @@ function getNeighbourDetails(chromosome, room, row, column) {
   }
 }
 
+/**
+ * Checks if the seat the neighbour is in is valid depending on room dimensions
+ * @param {array} neighbour Array containing neighbour row and column
+ * @param {number} room Dimensions of a room
+ * @returns {boolean}
+ */
 function isValidNeighbour(neighbour, room) {
   // Check if neighbour row and column is valid
   // Neighbour is not a valid seat as 
