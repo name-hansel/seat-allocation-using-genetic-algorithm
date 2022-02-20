@@ -1,16 +1,23 @@
 const fs = require("fs");
 const Papa = require("papaparse");
 
-const shuffleArray = require("./utils")
+const { shuffleArray, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour } = require("./utils")
 
-const POPULATION_SIZE = 1;
+const POPULATION_SIZE = 5;
 const GENERATION_LIMIT = 1;
 // const mutationProbability = 0.03
 
+// Read subject details from csv file
+var csv = fs.readFileSync("subject_details.csv");
+const subjectDetails = Papa.parse(csv.toString());
+// Save subject dissimilarity data in an object
+const subjectDissimilarityData = getSubjectDissimilarity(subjectDetails.data)
+
 // Read room details from csv file
 // [ row, column ]
-var csv = fs.readFileSync("room_details.csv");
+csv = fs.readFileSync("room_details.csv");
 const roomDetails = Papa.parse(csv.toString());
+const numberOfSeats = getNumberOfSeats(roomDetails.data)
 
 // Read student details from csv file
 // [ roll_number, subject ]
@@ -53,38 +60,6 @@ for (let i = 0; i < POPULATION_SIZE - 1; i++) {
   population.push(chromosome);
 }
 
-function isValidNeighbour(neighbour, room) {
-  // Check if neighbour row and column is valid
-  // Neighbour is not a valid seat as 
-  if (neighbour[0] === -1 || neighbour[1] === -1)
-    return false
-  // Neighbour is out of row and column of that room
-  if (neighbour[0] + 1 > room[0] || neighbour[1] + 1 > room[1])
-    return false
-  return true
-}
-
-function getNeighbourDetails(chromosome, room, row, column) {
-  for (let i = 0; i < chromosome.length; i++) {
-    if (chromosome[i][0] !== room) continue;
-    if (chromosome[i][1] !== row) continue;
-    if (chromosome[i][2] !== column) continue;
-    return [room, row, column, chromosome[i][3]]
-  }
-}
-
-function getDistanceBetweenNeighbours(v1, v2) {
-  return Math.sqrt(Math.pow((v1[0] - v2[0]), 2) + Math.pow((v1[1] - v2[1]), 2))
-}
-
-function getArraySum(array) {
-  let sum = 0;
-  for (let i = 0; i < array.length; i++) {
-    sum += array[i];
-  }
-  return sum;
-}
-
 function fitnessValue(chromosome) {
   const fitnessForEachGene = chromosome.map(gene => {
     // Gene contains [room, row, column, [roll_number,student]]
@@ -93,6 +68,10 @@ function fitnessValue(chromosome) {
     const row = gene[1];
     const column = gene[2];
     const student = gene[3];
+
+    // Check if seat is unoccupied
+    // TODO empty seat fitness
+    if (student.length === 0) return 1;
 
     // Get neighbours of a particular seat
     var neighbours = [[row - 1, column], [row, column - 1], [row, column + 1], [row + 1, column]];
@@ -103,16 +82,23 @@ function fitnessValue(chromosome) {
 
     // Iterate through neighbours and calculate fitness for each neighbour
     const geneFitness = validNeighbours.map(neighbour => {
+      // Check if neighbour is empty
+      // TODO empty seat fitness
+      if (neighbour[3].length === 0) return 1;
+
       // Calculate distance between each neighbour
       const distance = getDistanceBetweenNeighbours([row, column], [neighbour[1], neighbour[2]])
+
       // Calculate subject similarity
-      const subjectDissimilarity = 1;
+      const subjectDissimilarity = subjectDissimilarityData[student[1]][neighbour[3][1]];
+      // Calculate fitness
       const fitness = (distance * subjectDissimilarity) / Math.sqrt(Math.pow(Number(currentRoomDimensions[0]), 2) + Math.pow(Number(currentRoomDimensions[1]), 2))
+
       return fitness
     })
     return getArraySum(geneFitness)
   })
-  return { solution: chromosome, fitness: getArraySum(fitnessForEachGene) }
+  return { solution: chromosome, fitness: getArraySum(fitnessForEachGene) / numberOfSeats }
 }
 
 currentGeneration = 1;
@@ -120,9 +106,9 @@ currentGeneration = 1;
 while (currentGeneration <= GENERATION_LIMIT) {
   // Calculate fitness of each chromosome (solution) in population and store
   const fitness = population.map(solution => fitnessValue(solution))
-
+  console.log(fitness)
   // ! SELECTION
-  // Send top 10% of weighted population (whose fitness has been calculated) as it is to next generation
+  // Send top 10% of population as it is to next generation
 
   // Fill rest of the population using crossover and mutation
   // Select 2 parents for mating
