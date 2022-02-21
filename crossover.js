@@ -1,5 +1,3 @@
-const { createRoutesFromChildren } = require("react-router-dom")
-
 const parent1 = [
   [0, 0, 0, ['PES01', 'AA']],
   [0, 0, 1, ['PES02', 'AA']],
@@ -90,10 +88,21 @@ const parent2Length = parent2.length
 const offspring1 = []
 const offspring2 = []
 
-// for (let i = 0; i < parent1Length; i++) {
-//   offspring1[i] = [];
-//   offspring2[i] = [];
-// }
+function generateBreakpoints(parentLength) {
+  var breakPoint1 = 0;
+  var breakPoint2 = 0;
+  while (breakPoint1 === breakPoint2) {
+    breakPoint1 = Math.floor(Math.random() * (parentLength + 1));
+    breakPoint2 = Math.floor(Math.random() * (parentLength + 1));
+  }
+  if (breakPoint1 > breakPoint2) [breakPoint1, breakPoint2] = [breakPoint2, breakPoint1]
+  return [breakPoint1, breakPoint2]
+}
+
+for (let i = 0; i < parent1Length; i++) {
+  offspring1[i] = [];
+  offspring2[i] = [];
+}
 
 function contains(student, array) {
   for (let i = 0; i < array.length; i++) {
@@ -103,21 +112,41 @@ function contains(student, array) {
 }
 
 function orderOneCrossover() {
+  // https://www.rubicite.com/Tutorials/GeneticAlgorithms/CrossoverOperators/Order1CrossoverOperator.aspx
 
+  // Generate 2 breakpoints
+  const [breakPoint1, breakPoint2] = generateBreakpoints(parent1Length);
+
+  // Create object which indicates which seats are already present in offspring
+  const offspring1Mapping = {};
+
+  // Copy genes from parent 1 to offspring 1 between breakpoints
+  for (let i = breakPoint1; i <= breakPoint2; i++) {
+    offspring1[i] = parent1[i];
+    if (parent1[i][3].length !== 0) offspring1Mapping[parent1[i][3][0]] = 1;
+  }
+
+  // Copy genes at points other than breakpoints from parent 2 (if not already present in offspring)
+  // ! Need to keep track of offspring position and parent position differently
+  // ! Avoid breakpoint section in offspring
+  for (let i = 0; i < parent1Length;) {
+    // Already present, skip
+    if (parent2[i][3].length !== 0 && offspring1Mapping[parent2[i][3][0]] === 1) {
+      continue;
+    };
+    offspring1[i] = parent2[i];
+    i++;
+  }
+
+  console.log(offspring1)
 }
 
 // Partially mapped crossover
 function partiallyMappedCrossover() {
   // https://github.com/dwdyer/watchmaker/blob/master/framework/src/java/main/org/uncommons/watchmaker/framework/operators/ListOrderCrossover.java
+
   // Generate 2 breakpoints
-  var breakPoint1 = 0;
-  var breakPoint2 = 0;
-  while (breakPoint1 === breakPoint2) {
-    breakPoint1 = Math.floor(Math.random() * (parent1Length + 1));
-    breakPoint2 = Math.floor(Math.random() * (parent1Length + 1));
-  }
-  if (breakPoint1 > breakPoint2) [breakPoint1, breakPoint2] = [breakPoint2, breakPoint1]
-  console.log(breakPoint1, breakPoint2)
+  const [breakPoint1, breakPoint2] = generateBreakpoints(parent1Length);
 
   // STACKOVERFLOW ANSWER
   // https://stackoverflow.com/questions/60320147/handling-duplicates-when-using-partially-matched-crossover-for-genetic-algorithm
@@ -172,4 +201,4 @@ function partiallyMappedCrossover() {
   // }
 }
 
-// partiallyMappedCrossover();
+orderOneCrossover();

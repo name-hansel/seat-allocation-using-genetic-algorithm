@@ -4,7 +4,7 @@ const Papa = require("papaparse");
 const { shuffleArray, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour } = require("./utils")
 const { elitism } = require("./selection")
 
-const POPULATION_SIZE = 2;
+const POPULATION_SIZE = 10;
 const GENERATION_LIMIT = 2;
 // const mutationProbability = 0.03
 
@@ -58,6 +58,7 @@ const population = []
 // First solution is students arranged as ordered in list
 population.push(allotedSeats)
 
+// Create initial population by shuffling up first solution
 for (let i = 0; i < POPULATION_SIZE - 1; i++) {
   // Make deep copy of initial solution
   const chromosome = JSON.parse(JSON.stringify(population[i]));
@@ -97,6 +98,7 @@ function fitnessValue(chromosome) {
 
       // Calculate subject similarity
       const subjectDissimilarity = subjectDissimilarityData[student[1]][neighbour[3][1]];
+
       // Calculate fitness
       const fitness = (distance * subjectDissimilarity) / Math.sqrt(Math.pow(Number(currentRoomDimensions[0]), 2) + Math.pow(Number(currentRoomDimensions[1]), 2))
 
