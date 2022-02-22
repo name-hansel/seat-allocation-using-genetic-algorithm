@@ -5,8 +5,8 @@ const { shuffleArray, getSubjectDissimilarity, getNumberOfSeats, getArraySum, ge
 const { elitismSelection } = require("./selection")
 const { orderOneCrossover } = require("./crossover")
 
-const POPULATION_SIZE = 5000;
-const GENERATION_LIMIT = 20;
+const POPULATION_SIZE = 500;
+const GENERATION_LIMIT = 100;
 // const mutationProbability = 0.03
 
 // Read subject details from csv file

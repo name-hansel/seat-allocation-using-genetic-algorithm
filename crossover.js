@@ -8,6 +8,8 @@ function generateBreakpoints(parentLength) {
     breakPoint2 = Math.floor(Math.random() * (parentLength));
   }
   if (breakPoint1 > breakPoint2) [breakPoint1, breakPoint2] = [breakPoint2, breakPoint1]
+  // ! TODO FIX
+  if (breakPoint2 > 38) breakPoint2--;
   return [breakPoint1, breakPoint2]
 }
 
@@ -21,12 +23,16 @@ function orderOneCrossover(parentOne, parentTwo, roomDetails) {
   // Create object which indicates which seats are already present in offspring
   const offspringMapping = {};
 
+  // Keep track of number of elements added to offspring
+  var numberOfElementsInOffspring = 0;
+
   // Keep track of number of empty seats in offspring
   var numberOfEmptySeats = 0;
 
   // Copy genes from parent 1 to offspring between breakpoints
   for (let i = breakPoint1; i <= breakPoint2; i++) {
     offspring[i][3] = parentOne[i][3];
+    numberOfElementsInOffspring++;
     if (isSeatEmpty(parentOne[i])) numberOfEmptySeats++;
     else offspringMapping[parentOne[i][3][0]] = 1;
   }
@@ -34,60 +40,33 @@ function orderOneCrossover(parentOne, parentTwo, roomDetails) {
   // Copy genes at points other than breakpoints from parent 2 (if not already present in offspring)
   var i = breakPoint2 + 1;  // Offspring
   var j = breakPoint2 + 1;  // Parent 2
-  while (i < geneLength && j < geneLength) {
+  while (numberOfElementsInOffspring < geneLength) {
     if (!isSeatEmpty(parentTwo[j]) && offspringMapping[parentTwo[j][3][0]] === 1) {
       // Seat already present
-      j++;
+      j = (j + 1) % geneLength;
       continue;
     }
 
     if (!isSeatEmpty(parentTwo[j]) && offspringMapping[parentTwo[j][3][0]] !== 1) {
       // Seat copied from parent 2 to offspring
       offspring[i][3] = parentTwo[j][3];
-      i++;
-      j++;
+      numberOfElementsInOffspring++;
+      j = (j + 1) % geneLength;
+      i = (i + 1) % geneLength;
       continue;
     }
 
     if (isSeatEmpty(parentTwo[j]) && numberOfEmptySeats >= 4) {
       // Parent contains empty seat, but already seats are present
-      j++;
+      j = (j + 1) % geneLength;
       continue;
     } else if (isSeatEmpty(parentTwo[j]) && numberOfEmptySeats < 4) numberOfEmptySeats++;
     // Parent seat is not empty
     // Parent seat already present in offspring
     offspring[i][3] = parentTwo[j][3];
-    i++;
-    j++;
-  }
-
-  i = 0;
-  j = 0;
-  while (i < breakPoint1 && j < breakPoint1) {
-    if (!isSeatEmpty(parentTwo[j]) && offspringMapping[parentTwo[j][3][0]] === 1) {
-      // Seat already present
-      j++;
-      continue;
-    }
-
-    if (!isSeatEmpty(parentTwo[j]) && offspringMapping[parentTwo[j][3][0]] !== 1) {
-      // Seat copied from parent 2 to offspring
-      offspring[i][3] = parentTwo[j][3];
-      i++;
-      j++;
-      continue;
-    }
-
-    if (isSeatEmpty(parentTwo[j]) && numberOfEmptySeats >= 4) {
-      // Parent contains empty seat, but already seats are present
-      j++;
-      continue;
-    } else if (isSeatEmpty(parentTwo[j]) && numberOfEmptySeats < 4) numberOfEmptySeats++;
-    // Parent seat is not empty
-    // Parent seat already present in offspring
-    offspring[i][3] = parentTwo[j][3];
-    i++;
-    j++;
+    numberOfElementsInOffspring++;
+    j = (j + 1) % geneLength;
+    i = (i + 1) % geneLength;
   }
 
   return offspring

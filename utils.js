@@ -104,7 +104,6 @@ function isSeatEmpty(seat) {
 
 function checkIfValidSolution(chromosome) {
   const rollNumbers = [];
-  console.log(chromosome)
   // Check if all roll no.s are present
   for (let i = 0; i < chromosome.length; i++) {
     rollNumbers.push(chromosome[i][3].length === 0 ? '' : chromosome[i][3][0])
