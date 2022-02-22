@@ -1,16 +1,18 @@
 const fs = require("fs");
 const Papa = require("papaparse");
 
-const { shuffleArray, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour } = require("./utils")
-const { elitism } = require("./selection")
+const { shuffleArray, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour, isSeatEmpty, checkIfValidSolution } = require("./utils")
+const { elitismSelection } = require("./selection")
+const { orderOneCrossover } = require("./crossover")
 
-const POPULATION_SIZE = 10;
-const GENERATION_LIMIT = 2;
+const POPULATION_SIZE = 5000;
+const GENERATION_LIMIT = 20;
 // const mutationProbability = 0.03
 
 // Read subject details from csv file
 var csv = fs.readFileSync("subject_details.csv");
 const subjectDetails = Papa.parse(csv.toString());
+
 // Save subject dissimilarity data in an object
 const subjectDissimilarityData = getSubjectDissimilarity(subjectDetails.data)
 
@@ -61,7 +63,7 @@ population.push(allotedSeats)
 // Create initial population by shuffling up first solution
 for (let i = 0; i < POPULATION_SIZE - 1; i++) {
   // Make deep copy of initial solution
-  const chromosome = JSON.parse(JSON.stringify(population[i]));
+  const chromosome = JSON.parse(JSON.stringify(allotedSeats));
   // Shuffle student details and add to population
   shuffleArray(chromosome);
   population.push(chromosome);
@@ -77,8 +79,7 @@ function fitnessValue(chromosome) {
     const student = gene[3];
 
     // Check if seat is unoccupied
-    // TODO empty seat fitness
-    if (student.length === 0) return 1;
+    if (isSeatEmpty(gene)) return 0;
 
     // Get neighbours of a particular seat
     var neighbours = [[row - 1, column], [row, column - 1], [row, column + 1], [row + 1, column]];
@@ -90,8 +91,7 @@ function fitnessValue(chromosome) {
     // Iterate through neighbours and calculate fitness for each neighbour
     const geneFitness = validNeighbours.map(neighbour => {
       // Check if neighbour is empty
-      // TODO empty seat fitness
-      if (neighbour[3].length === 0) return 1;
+      if (isSeatEmpty(neighbour)) return 0;
 
       // Calculate distance between each neighbour
       const distance = getDistanceBetweenNeighbours([row, column], [neighbour[1], neighbour[2]])
@@ -112,6 +112,7 @@ function fitnessValue(chromosome) {
 currentGeneration = 1;
 // Start iterating through generations
 while (currentGeneration <= GENERATION_LIMIT) {
+  console.log(`Generation ${currentGeneration}`)
   // Calculate fitness of each chromosome (solution) in population and store
   const populationWithCalculatedFitness = population.map(solution => fitnessValue(solution))
 
@@ -120,17 +121,30 @@ while (currentGeneration <= GENERATION_LIMIT) {
     return b.fitness - a.fitness;
   })
 
-  // ! SELECTION (build mating pool)
-  const newPopulation = elitism(populationWithCalculatedFitness, 20, POPULATION_SIZE);
+  // Build a mating pool using any selection method
+  // ! SELECTION
+  const [matingPool, nextPopulation] = elitismSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE);
 
-  // Fill rest of the population using crossover and mutation
-  // Select 2 parents for mating
-  // Do crossover to create offspring
-  // Mutate offspring (Keeping in mind mutationProbability)
-  // If valid offsprings, add to population
-  // Print best solution in current population
-  // Check if current best is better
+  // ! CROSSOVER
+  // While next population is not full, keep generating offsprings using random parents from mating pool
+  while (nextPopulation.length < POPULATION_SIZE) {
+    // Create copy of mating pool to get random elements out of it
+    const copyMatingPool = [...matingPool];
+    shuffleArray(copyMatingPool);
+    nextPopulation.push(orderOneCrossover(copyMatingPool[0], copyMatingPool[1], roomDetails))
+    nextPopulation.push(orderOneCrossover(copyMatingPool[1], copyMatingPool[0], roomDetails))
+  }
+
+  // Clear previous population
+  population.length = 0
+  population.push(...nextPopulation);
+
+  // ! MUTATION
   currentGeneration++;
+  if (currentGeneration > GENERATION_LIMIT) {
+    console.log(populationWithCalculatedFitness[0].solution)
+    checkIfValidSolution(populationWithCalculatedFitness[0].solution)
+  }
 }
 
 // Print best solution

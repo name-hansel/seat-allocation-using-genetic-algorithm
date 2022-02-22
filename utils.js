@@ -97,6 +97,37 @@ function isValidNeighbour(neighbour, room) {
   return true
 }
 
+function isSeatEmpty(seat) {
+  if (seat[3].length === 0) return true
+  return false
+}
+
+function checkIfValidSolution(chromosome) {
+  const rollNumbers = [];
+  console.log(chromosome)
+  // Check if all roll no.s are present
+  for (let i = 0; i < chromosome.length; i++) {
+    rollNumbers.push(chromosome[i][3].length === 0 ? '' : chromosome[i][3][0])
+  }
+
+  console.log(rollNumbers.sort())
+}
+
+function initialiseChromosome(roomDetails) {
+  const chromosome = []
+  for (let i = 0; i < roomDetails.data.length; i++) {
+    const rows = Number(roomDetails.data[i][0]);
+    const columns = Number(roomDetails.data[i][1]);
+
+    for (let row = 0; row < rows; row++) {
+      for (let column = 0; column < columns; column++) {
+        chromosome.push([i, row, column, []])
+      }
+    }
+  }
+  return chromosome;
+}
+
 module.exports = {
   shuffleArray,
   getSubjectDissimilarity,
@@ -104,5 +135,8 @@ module.exports = {
   getArraySum,
   getDistanceBetweenNeighbours,
   getNeighbourDetails,
-  isValidNeighbour
+  isValidNeighbour,
+  isSeatEmpty,
+  checkIfValidSolution,
+  initialiseChromosome
 }
