@@ -5,8 +5,8 @@ const { shuffleArray, getSubjectDissimilarity, getNumberOfSeats, getArraySum, ge
 const { elitismSelection } = require("./selection")
 const { orderOneCrossover } = require("./crossover")
 
-const POPULATION_SIZE = 500;
-const GENERATION_LIMIT = 100;
+const POPULATION_SIZE = 200;
+const GENERATION_LIMIT = 10;
 // const mutationProbability = 0.03
 
 // Read subject details from csv file
@@ -64,9 +64,10 @@ population.push(allotedSeats)
 for (let i = 0; i < POPULATION_SIZE - 1; i++) {
   // Make deep copy of initial solution
   const chromosome = JSON.parse(JSON.stringify(allotedSeats));
+
   // Shuffle student details and add to population
-  shuffleArray(chromosome);
-  population.push(chromosome);
+  const newChromosome = shuffleArray(chromosome);
+  population.push(newChromosome);
 }
 
 function fitnessValue(chromosome) {
@@ -129,8 +130,7 @@ while (currentGeneration <= GENERATION_LIMIT) {
   // While next population is not full, keep generating offsprings using random parents from mating pool
   while (nextPopulation.length < POPULATION_SIZE) {
     // Create copy of mating pool to get random elements out of it
-    const copyMatingPool = [...matingPool];
-    shuffleArray(copyMatingPool);
+    const copyMatingPool = shuffleArray(matingPool);
     nextPopulation.push(orderOneCrossover(copyMatingPool[0], copyMatingPool[1], roomDetails))
     nextPopulation.push(orderOneCrossover(copyMatingPool[1], copyMatingPool[0], roomDetails))
   }
@@ -143,7 +143,6 @@ while (currentGeneration <= GENERATION_LIMIT) {
   currentGeneration++;
   if (currentGeneration > GENERATION_LIMIT) {
     console.log(populationWithCalculatedFitness[0].solution)
-    checkIfValidSolution(populationWithCalculatedFitness[0].solution)
   }
 }
 

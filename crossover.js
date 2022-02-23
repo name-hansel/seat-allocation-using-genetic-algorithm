@@ -1,15 +1,8 @@
-const { isSeatEmpty, initialiseChromosome } = require("./utils")
+const { isSeatEmpty, initialiseChromosome, checkIfValidSolution } = require("./utils")
 
 function generateBreakpoints(parentLength) {
-  var breakPoint1 = 0;
-  var breakPoint2 = 0;
-  while (breakPoint1 === breakPoint2) {
-    breakPoint1 = Math.floor(Math.random() * (parentLength));
-    breakPoint2 = Math.floor(Math.random() * (parentLength));
-  }
-  if (breakPoint1 > breakPoint2) [breakPoint1, breakPoint2] = [breakPoint2, breakPoint1]
-  // ! TODO FIX
-  if (breakPoint2 > 38) breakPoint2--;
+  var breakPoint1 = Math.floor(Math.random() * (parentLength - 1));
+  var breakPoint2 = Math.floor(Math.random() * (parentLength - breakPoint1 - 1)) + breakPoint1 + 1;
   return [breakPoint1, breakPoint2]
 }
 
@@ -38,8 +31,8 @@ function orderOneCrossover(parentOne, parentTwo, roomDetails) {
   }
 
   // Copy genes at points other than breakpoints from parent 2 (if not already present in offspring)
-  var i = breakPoint2 + 1;  // Offspring
-  var j = breakPoint2 + 1;  // Parent 2
+  var i = (breakPoint2 + 1) % geneLength;  // Offspring
+  var j = (breakPoint2 + 1) % geneLength;  // Parent 2
   while (numberOfElementsInOffspring < geneLength) {
     if (!isSeatEmpty(parentTwo[j]) && offspringMapping[parentTwo[j][3][0]] === 1) {
       // Seat already present
@@ -69,6 +62,19 @@ function orderOneCrossover(parentOne, parentTwo, roomDetails) {
     i = (i + 1) % geneLength;
   }
 
+  console.log(breakPoint1, breakPoint2)
+  console.log(parentOne)
+  console.log(parentTwo)
+  console.log(offspring)
+  console.log(offspringMapping)
+  console.log("-----")
+  if (!checkIfValidSolution(offspring)) {
+    throw new Error();
+  }
+
+  // console.log(breakPoint1, breakPoint2)
+  // console.log(numberOfEmptySeats)
+  // console.log("--------")
   return offspring
 }
 

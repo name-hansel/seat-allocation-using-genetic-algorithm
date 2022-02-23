@@ -1,14 +1,16 @@
 /**
- * Shuffles an array in place
+ * Shuffles an array and returns the shuffled array
  * @param {array} array Array to be shuffled
  */
 function shuffleArray(array) {
-  for (var i = array.length - 1; i > 0; i--) {
+  const returnArray = [...array]
+  for (var i = returnArray.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
-    var temp = array[i][3];
-    array[i][3] = array[j][3];
-    array[j][3] = temp;
+    var temp = returnArray[i][3];
+    returnArray[i][3] = returnArray[j][3];
+    returnArray[j][3] = temp;
   }
+  return returnArray;
 }
 
 /**
@@ -103,13 +105,17 @@ function isSeatEmpty(seat) {
 }
 
 function checkIfValidSolution(chromosome) {
-  const rollNumbers = [];
-  // Check if all roll no.s are present
+  // Check number of empty seats
+  var numberOfEmptySeats = 0;
   for (let i = 0; i < chromosome.length; i++) {
-    rollNumbers.push(chromosome[i][3].length === 0 ? '' : chromosome[i][3][0])
+    if (isSeatEmpty(chromosome[i]) === 0) numberOfEmptySeats++;
   }
-
-  console.log(rollNumbers.sort())
+  if (numberOfEmptySeats !== 4) {
+    console.log("INVALID NO. OF EMPTY SEATS")
+    console.log(chromosome)
+    return false
+  }
+  return true
 }
 
 function initialiseChromosome(roomDetails) {
