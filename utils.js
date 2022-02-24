@@ -13,6 +13,17 @@ function shuffleArray(array) {
   return returnArray;
 }
 
+function shuffleMatingPool(array) {
+  const returnArray = [...array]
+  for (var i = returnArray.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = returnArray[i];
+    returnArray[i] = returnArray[j];
+    returnArray[j] = temp;
+  }
+  return returnArray;
+}
+
 /**
  * Calculates sum of elements in an array
  * @param {array} array Array whose sum is to be calculated
@@ -100,21 +111,27 @@ function isValidNeighbour(neighbour, room) {
 }
 
 function isSeatEmpty(seat) {
-  if (seat[3].length === 0) return true
-  return false
+  return seat[3].length === 0
 }
 
-function checkIfValidSolution(chromosome) {
+function checkIfValidSolution(chromosome, allotedSeats) {
   // Check number of empty seats
+  const rollNumbers = []
   var numberOfEmptySeats = 0;
   for (let i = 0; i < chromosome.length; i++) {
-    if (isSeatEmpty(chromosome[i]) === 0) numberOfEmptySeats++;
+    if (isSeatEmpty(chromosome[i])) numberOfEmptySeats++;
   }
   if (numberOfEmptySeats !== 4) {
     console.log("INVALID NO. OF EMPTY SEATS")
-    console.log(chromosome)
     return false
   }
+  // Check if all roll numbers are present
+  for (let i = 0; i < chromosome.length; i++) {
+    rollNumbers.push(chromosome[i][3].length === 0 ? '' : chromosome[i][3][0])
+  }
+
+  rollNumbers.sort();
+  console.log(rollNumbers)
   return true
 }
 
@@ -143,5 +160,6 @@ module.exports = {
   isValidNeighbour,
   isSeatEmpty,
   checkIfValidSolution,
-  initialiseChromosome
+  initialiseChromosome,
+  shuffleMatingPool
 }

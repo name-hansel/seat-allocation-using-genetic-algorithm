@@ -27,13 +27,13 @@ const offspring = parentOne.map(() => [])
 const [b1, b2] = generateBreakpoints(parentOne.length)
 
 const elementsAlreadyPresentInOffspring = {};
-var numberOfElementsInOffspring = 0;
+// var numberOfElementsInOffspring = 0;
 var numberOfEmptySeats = 0;
 
 // COPY GENES FROM BREAKPOINTS
 for (let i = b1; i <= b2; i++) {
   offspring[i] = parentOne[i]
-  numberOfElementsInOffspring++;
+  // numberOfElementsInOffspring++;
   if (isSeatEmpty(parentOne[i])) numberOfEmptySeats++;
   else elementsAlreadyPresentInOffspring[parentOne[i][0]] = 1;
 }

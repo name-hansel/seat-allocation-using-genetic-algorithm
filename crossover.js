@@ -6,75 +6,69 @@ function generateBreakpoints(parentLength) {
   return [breakPoint1, breakPoint2]
 }
 
-function orderOneCrossover(parentOne, parentTwo, roomDetails) {
+function orderOneCrossover(parentOne, parentTwo, roomDetails, emptySeats) {
   const geneLength = parentOne.length;
+
+  // Initialize offspring using room details 
   const offspring = initialiseChromosome(roomDetails)
 
   // Generate 2 breakpoints
-  const [breakPoint1, breakPoint2] = generateBreakpoints(geneLength);
+  const [b1, b2] = generateBreakpoints(geneLength);
 
   // Create object which indicates which seats are already present in offspring
-  const offspringMapping = {};
+  const elementsAlreadyPresentInOffspring = {};
 
   // Keep track of number of elements added to offspring
-  var numberOfElementsInOffspring = 0;
 
   // Keep track of number of empty seats in offspring
   var numberOfEmptySeats = 0;
 
   // Copy genes from parent 1 to offspring between breakpoints
-  for (let i = breakPoint1; i <= breakPoint2; i++) {
+  for (let i = b1; i <= b2; i++) {
     offspring[i][3] = parentOne[i][3];
-    numberOfElementsInOffspring++;
     if (isSeatEmpty(parentOne[i])) numberOfEmptySeats++;
-    else offspringMapping[parentOne[i][3][0]] = 1;
+    else elementsAlreadyPresentInOffspring[parentOne[i][3][0]] = 1;
   }
 
-  // Copy genes at points other than breakpoints from parent 2 (if not already present in offspring)
-  var i = (breakPoint2 + 1) % geneLength;  // Offspring
-  var j = (breakPoint2 + 1) % geneLength;  // Parent 2
-  while (numberOfElementsInOffspring < geneLength) {
-    if (!isSeatEmpty(parentTwo[j]) && offspringMapping[parentTwo[j][3][0]] === 1) {
-      // Seat already present
-      j = (j + 1) % geneLength;
-      continue;
+  // Extract seats from parent 2 which are not present in offspring
+  var index = (b2 + 1) % geneLength;
+  var elementsToPush = [];
+  do {
+    // If seat is empty, simply push
+    if (!isSeatEmpty(parentTwo[index])) {
+      if (elementsAlreadyPresentInOffspring[parentTwo[index][3][0]] !== 1)
+        elementsToPush.push(parentTwo[index])
+    } else {
+      elementsToPush.push(parentTwo[index])
     }
+    index = (index + 1) % geneLength;
+  } while (index !== (b2 + 1) % geneLength);
 
-    if (!isSeatEmpty(parentTwo[j]) && offspringMapping[parentTwo[j][3][0]] !== 1) {
-      // Seat copied from parent 2 to offspring
-      offspring[i][3] = parentTwo[j][3];
-      numberOfElementsInOffspring++;
-      j = (j + 1) % geneLength;
+  var i = (b2 + 1) % geneLength;
+  var j = 0;
+  while (j < elementsToPush.length) {
+    // Seat is not empty, simply add to offspring
+    if (!isSeatEmpty(elementsToPush[j])) {
+      offspring[i][3] = elementsToPush[j][3];
+      j++;
       i = (i + 1) % geneLength;
       continue;
     }
 
-    if (isSeatEmpty(parentTwo[j]) && numberOfEmptySeats >= 4) {
-      // Parent contains empty seat, but already seats are present
-      j = (j + 1) % geneLength;
+    // Seat is empty, check number of empty seats in offspring
+    if (numberOfEmptySeats < emptySeats) {
+      // Add empty seat to offspring
+      numberOfEmptySeats++;
+      offspring[i][3] = elementsToPush[j][3];
+      j++;
+      i = (i + 1) % geneLength;
       continue;
-    } else if (isSeatEmpty(parentTwo[j]) && numberOfEmptySeats < 4) numberOfEmptySeats++;
-    // Parent seat is not empty
-    // Parent seat already present in offspring
-    offspring[i][3] = parentTwo[j][3];
-    numberOfElementsInOffspring++;
-    j = (j + 1) % geneLength;
-    i = (i + 1) % geneLength;
+    } else {
+      // Number of empty seats has exceeded
+      j++;
+    }
   }
 
-  console.log(breakPoint1, breakPoint2)
-  console.log(parentOne)
-  console.log(parentTwo)
-  console.log(offspring)
-  console.log(offspringMapping)
-  console.log("-----")
-  if (!checkIfValidSolution(offspring)) {
-    throw new Error();
-  }
-
-  // console.log(breakPoint1, breakPoint2)
-  // console.log(numberOfEmptySeats)
-  // console.log("--------")
   return offspring
 }
 

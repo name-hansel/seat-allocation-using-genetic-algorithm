@@ -1,12 +1,12 @@
 const fs = require("fs");
 const Papa = require("papaparse");
 
-const { shuffleArray, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour, isSeatEmpty, checkIfValidSolution } = require("./utils")
+const { shuffleArray, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour, isSeatEmpty, shuffleMatingPool, checkIfValidSolution } = require("./utils")
 const { elitismSelection } = require("./selection")
 const { orderOneCrossover } = require("./crossover")
 
-const POPULATION_SIZE = 200;
-const GENERATION_LIMIT = 10;
+const POPULATION_SIZE = 500;
+const GENERATION_LIMIT = 100;
 // const mutationProbability = 0.03
 
 // Read subject details from csv file
@@ -20,7 +20,7 @@ const subjectDissimilarityData = getSubjectDissimilarity(subjectDetails.data)
 // [ row, column ]
 csv = fs.readFileSync("room_details.csv");
 const roomDetails = Papa.parse(csv.toString());
-const numberOfSeats = getNumberOfSeats(roomDetails.data)
+const numberOfSeats = getNumberOfSeats(roomDetails.data);
 
 // Read student details from csv file
 // [ roll_number, subject ]
@@ -28,7 +28,9 @@ csv = fs.readFileSync("student_details.csv");
 const studentDetails = Papa.parse(csv.toString());
 const numberOfStudents = studentDetails.data.length
 
-if (numberOfSeats < numberOfStudents) {
+const emptySeats = numberOfSeats - numberOfStudents;
+
+if (emptySeats < 0) {
   console.log("Insufficient number of seats");
   return;
 }
@@ -130,9 +132,9 @@ while (currentGeneration <= GENERATION_LIMIT) {
   // While next population is not full, keep generating offsprings using random parents from mating pool
   while (nextPopulation.length < POPULATION_SIZE) {
     // Create copy of mating pool to get random elements out of it
-    const copyMatingPool = shuffleArray(matingPool);
-    nextPopulation.push(orderOneCrossover(copyMatingPool[0], copyMatingPool[1], roomDetails))
-    nextPopulation.push(orderOneCrossover(copyMatingPool[1], copyMatingPool[0], roomDetails))
+    const copyMatingPool = shuffleMatingPool(matingPool);
+    nextPopulation.push(orderOneCrossover(copyMatingPool[0], copyMatingPool[1], roomDetails, emptySeats))
+    nextPopulation.push(orderOneCrossover(copyMatingPool[1], copyMatingPool[0], roomDetails, emptySeats))
   }
 
   // Clear previous population
@@ -140,14 +142,11 @@ while (currentGeneration <= GENERATION_LIMIT) {
   population.push(...nextPopulation);
 
   // ! MUTATION
+  // TODO
+
   currentGeneration++;
   if (currentGeneration > GENERATION_LIMIT) {
     console.log(populationWithCalculatedFitness[0].solution)
+    checkIfValidSolution(populationWithCalculatedFitness[0].solution)
   }
 }
-
-// Print best solution
-
-
-// Fitness constraints - minimum number of rooms, all students allocated a seat, neighbouring not of same department
-// https://github.com/foobar98/SeatingArrangment_GA/blob/master/seatArrangement.py
