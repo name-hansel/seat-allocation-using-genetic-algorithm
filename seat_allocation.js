@@ -1,13 +1,13 @@
 const fs = require("fs");
 const Papa = require("papaparse");
 
-const { shuffleChromosome, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour, isSeatEmpty, shuffleMatingPool } = require("./utils")
+const { shuffleChromosome, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour, isSeatEmpty, shuffleMatingPool, tworsMutate } = require("./utils")
 const { elitismSelection } = require("./selection")
 const { orderOneCrossover } = require("./crossover")
 
-const POPULATION_SIZE = 3000;
-const GENERATION_LIMIT = 25;
-// const mutationProbability = 0.03
+const POPULATION_SIZE = 1000;
+const GENERATION_LIMIT = 100;
+const mutationRate = 0.03
 
 // Read subject details from csv file
 var csv = fs.readFileSync("subject_details.csv");
@@ -35,6 +35,7 @@ if (emptySeats < 0) {
   return;
 }
 
+const graphPoints = [];
 const allotedSeats = [];
 
 // Generate initial population
@@ -126,6 +127,11 @@ while (currentGeneration <= GENERATION_LIMIT) {
   const averageGenerationFitness = totalGenerationFitness / POPULATION_SIZE;
   console.log(`Generation: ${currentGeneration}\nAverage fitness: ${averageGenerationFitness}`)
 
+  graphPoints.push({
+    generation: currentGeneration,
+    fitness: averageGenerationFitness
+  })
+
   // Sort solutions in a population based on fitness
   populationWithCalculatedFitness.sort((a, b) => {
     return b.fitness - a.fitness;
@@ -140,16 +146,21 @@ while (currentGeneration <= GENERATION_LIMIT) {
   while (nextPopulation.length < POPULATION_SIZE) {
     // Create copy of mating pool to get random elements out of it
     const copyMatingPool = shuffleMatingPool(matingPool);
-    nextPopulation.push(orderOneCrossover(copyMatingPool[0], copyMatingPool[1], roomDetails, emptySeats))
-    nextPopulation.push(orderOneCrossover(copyMatingPool[1], copyMatingPool[0], roomDetails, emptySeats))
+
+    // Crossover using first 2 elements of shuffled mating pool
+    const offspringA = orderOneCrossover(copyMatingPool[0], copyMatingPool[1], roomDetails, emptySeats);
+    const offspringB = orderOneCrossover(copyMatingPool[1], copyMatingPool[0], roomDetails, emptySeats)
+
+    // Mutate offspring 1 and 2 here
+    const mutatedOffspringA = tworsMutate(offspringA, mutationRate);
+    const mutatedOffspringB = tworsMutate(offspringB, mutationRate);
+
+    nextPopulation.push(mutatedOffspringA, mutatedOffspringB);
   }
 
   // Clear previous population
   population.length = 0
   population.push(...nextPopulation);
-
-  // ! MUTATION
-  // TODO
 
   currentGeneration++;
 }
@@ -165,3 +176,4 @@ for (let i = 0; i < POPULATION_SIZE; i++) {
 
 console.log(bestSolution.fitness)
 console.log(bestSolution.solution)
+console.log(graphPoints)

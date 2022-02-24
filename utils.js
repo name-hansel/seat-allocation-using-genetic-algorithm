@@ -172,6 +172,31 @@ function generateBreakpoints(parentLength) {
   return [breakPoint1, breakPoint2]
 }
 
+function generateMutationPoints(parentLength) {
+  var indexA = Math.floor(Math.random() * (parentLength - 1));
+  var indexB = Math.floor(Math.random() * (parentLength - 1));
+  return [indexA, indexB]
+}
+
+function tworsMutate(chromosome, mutationRate) {
+  const mutationChance = Math.random()
+  // No mutation
+  if (mutationRate < mutationChance)
+    return chromosome;
+
+  // Create copy of chromosome
+  const copyChromosome = [...chromosome];
+  // Choose 2 points in chromosome
+  const [indexA, indexB] = generateBreakpoints(chromosome.length);
+
+  // Swap students at the two points
+  var temp = copyChromosome[indexA][3];
+  copyChromosome[indexA][3] = copyChromosome[indexB][3];
+  copyChromosome[indexB][3] = temp;
+
+  return copyChromosome;
+}
+
 module.exports = {
   shuffleChromosome,
   getSubjectDissimilarity,
@@ -184,5 +209,7 @@ module.exports = {
   checkIfValidSolution,
   initialiseChromosome,
   shuffleMatingPool,
-  generateBreakpoints
+  generateBreakpoints,
+  generateMutationPoints,
+  tworsMutate
 }
