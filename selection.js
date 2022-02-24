@@ -8,7 +8,7 @@ function elitismSelection(population, percentageOfElite, POPULATION_SIZE) {
   const matingPool = [];
   const newPopulation = [];
 
-  var numberOfParentsToCarryOver = parseInt((percentageOfElite / 100) * population.length);
+  var numberOfParentsToCarryOver = parseInt((percentageOfElite / 100) * POPULATION_SIZE);
 
   // If number of parents is 1, increment by 1 since crossover needs atleast 2 parents
   if (numberOfParentsToCarryOver === 1) numberOfParentsToCarryOver++;
@@ -22,6 +22,12 @@ function elitismSelection(population, percentageOfElite, POPULATION_SIZE) {
   return [matingPool.map(gene => gene.solution), newPopulation.map(gene => gene.solution)];
 }
 
+function rouletteWheelSelection(population) {
+  const matingPool = []
+  return [matingPool.map(gene => gene.solution), []]
+}
+
 module.exports = {
-  elitismSelection
+  elitismSelection,
+  rouletteWheelSelection
 }

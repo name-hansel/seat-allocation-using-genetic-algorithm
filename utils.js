@@ -1,27 +1,30 @@
 /**
- * Shuffles an array and returns the shuffled array
- * @param {array} array Array to be shuffled
+ * Shuffles a chromosome and returns the shuffled chromosome
+ * @param {array} chromosome Chromosome to be shuffled
  */
-function shuffleArray(array) {
-  const returnArray = [...array]
-  for (var i = returnArray.length - 1; i > 0; i--) {
+function shuffleChromosome(chromosome) {
+  const returnChromosome = [...chromosome]
+  for (var i = returnChromosome.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
-    var temp = returnArray[i][3];
-    returnArray[i][3] = returnArray[j][3];
-    returnArray[j][3] = temp;
+    var temp = returnChromosome[i][3];
+    returnChromosome[i][3] = returnChromosome[j][3];
+    returnChromosome[j][3] = temp;
   }
-  return returnArray;
+  return returnChromosome;
 }
-
-function shuffleMatingPool(array) {
-  const returnArray = [...array]
-  for (var i = returnArray.length - 1; i > 0; i--) {
+/**
+ * Shuffles a population and returns the shuffled population
+ * @param {array} population Population to be shuffled
+ */
+function shuffleMatingPool(population) {
+  const returnPopulation = [...population]
+  for (var i = returnPopulation.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
-    var temp = returnArray[i];
-    returnArray[i] = returnArray[j];
-    returnArray[j] = temp;
+    var temp = returnPopulation[i];
+    returnPopulation[i] = returnPopulation[j];
+    returnPopulation[j] = temp;
   }
-  return returnArray;
+  return returnPopulation;
 }
 
 /**
@@ -39,7 +42,6 @@ function getArraySum(array) {
 /**
  * Returns an object containing dissimilarity-factor of each subject pair
  * @param {array} array 2D array containing similarity-factor for each subject pair
- * @returns {object}
  */
 function getSubjectDissimilarity(data) {
   const numberOfSubjects = data[0].length - 1;
@@ -94,10 +96,9 @@ function getNeighbourDetails(chromosome, room, row, column) {
 }
 
 /**
- * Checks if the seat the neighbour is in is valid depending on room dimensions
+ * Checks if the seat the neighbour is in is valid depending on room dimensions and returns true or false
  * @param {array} neighbour Array containing neighbour row and column
  * @param {number} room Dimensions of a room
- * @returns {boolean}
  */
 function isValidNeighbour(neighbour, room) {
   // Check if neighbour row and column is valid
@@ -110,11 +111,19 @@ function isValidNeighbour(neighbour, room) {
   return true
 }
 
+/**
+ * Checks if the seat is empty and returns true if it is, and false if not
+ * @param {array} seat Seat containing room no., row no., column no., and student details
+ */
 function isSeatEmpty(seat) {
   return seat[3].length === 0
 }
 
-function checkIfValidSolution(chromosome, allotedSeats) {
+/**
+ * Checks if solution is valid on the basis of number of empty seats
+ * @param {array} chromosome Solution to be checked
+ */
+function checkIfValidSolution(chromosome) {
   // Check number of empty seats
   const rollNumbers = []
   var numberOfEmptySeats = 0;
@@ -135,11 +144,15 @@ function checkIfValidSolution(chromosome, allotedSeats) {
   return true
 }
 
-function initialiseChromosome(roomDetails) {
+/**
+ * Initializes a chromosome with room no., row no., and column no.
+ * @param {array} roomDetails
+ */
+function initialiseChromosome({ data }) {
   const chromosome = []
-  for (let i = 0; i < roomDetails.data.length; i++) {
-    const rows = Number(roomDetails.data[i][0]);
-    const columns = Number(roomDetails.data[i][1]);
+  for (let i = 0; i < data.length; i++) {
+    const rows = Number(data[i][0]);
+    const columns = Number(data[i][1]);
 
     for (let row = 0; row < rows; row++) {
       for (let column = 0; column < columns; column++) {
@@ -149,9 +162,18 @@ function initialiseChromosome(roomDetails) {
   }
   return chromosome;
 }
+/**
+ * Returns two unique points lying between 0 and length of parent
+ * @param {array} parentLength
+ */
+function generateBreakpoints(parentLength) {
+  var breakPoint1 = Math.floor(Math.random() * (parentLength - 1));
+  var breakPoint2 = Math.floor(Math.random() * (parentLength - breakPoint1 - 1)) + breakPoint1 + 1;
+  return [breakPoint1, breakPoint2]
+}
 
 module.exports = {
-  shuffleArray,
+  shuffleChromosome,
   getSubjectDissimilarity,
   getNumberOfSeats,
   getArraySum,
@@ -161,5 +183,6 @@ module.exports = {
   isSeatEmpty,
   checkIfValidSolution,
   initialiseChromosome,
-  shuffleMatingPool
+  shuffleMatingPool,
+  generateBreakpoints
 }

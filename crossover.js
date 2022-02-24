@@ -1,10 +1,4 @@
-const { isSeatEmpty, initialiseChromosome, checkIfValidSolution } = require("./utils")
-
-function generateBreakpoints(parentLength) {
-  var breakPoint1 = Math.floor(Math.random() * (parentLength - 1));
-  var breakPoint2 = Math.floor(Math.random() * (parentLength - breakPoint1 - 1)) + breakPoint1 + 1;
-  return [breakPoint1, breakPoint2]
-}
+const { isSeatEmpty, initialiseChromosome, generateBreakpoints } = require("./utils")
 
 function orderOneCrossover(parentOne, parentTwo, roomDetails, emptySeats) {
   const geneLength = parentOne.length;

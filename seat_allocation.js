@@ -1,12 +1,12 @@
 const fs = require("fs");
 const Papa = require("papaparse");
 
-const { shuffleArray, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour, isSeatEmpty, shuffleMatingPool, checkIfValidSolution } = require("./utils")
+const { shuffleChromosome, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour, isSeatEmpty, shuffleMatingPool } = require("./utils")
 const { elitismSelection } = require("./selection")
 const { orderOneCrossover } = require("./crossover")
 
-const POPULATION_SIZE = 500;
-const GENERATION_LIMIT = 100;
+const POPULATION_SIZE = 3000;
+const GENERATION_LIMIT = 25;
 // const mutationProbability = 0.03
 
 // Read subject details from csv file
@@ -68,7 +68,7 @@ for (let i = 0; i < POPULATION_SIZE - 1; i++) {
   const chromosome = JSON.parse(JSON.stringify(allotedSeats));
 
   // Shuffle student details and add to population
-  const newChromosome = shuffleArray(chromosome);
+  const newChromosome = shuffleChromosome(chromosome);
   population.push(newChromosome);
 }
 
@@ -109,15 +109,22 @@ function fitnessValue(chromosome) {
     })
     return getArraySum(geneFitness)
   })
-  return { solution: chromosome, fitness: getArraySum(fitnessForEachGene) / numberOfSeats }
+  return { solution: chromosome, fitness: Math.pow(getArraySum(fitnessForEachGene) / numberOfSeats, 2) }
 }
 
 currentGeneration = 1;
 // Start iterating through generations
 while (currentGeneration <= GENERATION_LIMIT) {
-  console.log(`Generation ${currentGeneration}`)
   // Calculate fitness of each chromosome (solution) in population and store
   const populationWithCalculatedFitness = population.map(solution => fitnessValue(solution))
+
+  // Calculate average fitness for a generation
+  var totalGenerationFitness = 0;
+  for (let i = 0; i < POPULATION_SIZE; i++)
+    totalGenerationFitness += populationWithCalculatedFitness[i].fitness;
+
+  const averageGenerationFitness = totalGenerationFitness / POPULATION_SIZE;
+  console.log(`Generation: ${currentGeneration}\nAverage fitness: ${averageGenerationFitness}`)
 
   // Sort solutions in a population based on fitness
   populationWithCalculatedFitness.sort((a, b) => {
@@ -145,8 +152,16 @@ while (currentGeneration <= GENERATION_LIMIT) {
   // TODO
 
   currentGeneration++;
-  if (currentGeneration > GENERATION_LIMIT) {
-    console.log(populationWithCalculatedFitness[0].solution)
-    checkIfValidSolution(populationWithCalculatedFitness[0].solution)
-  }
 }
+
+const bestPopulation = population.map(solution => fitnessValue(solution))
+var bestSolution = bestPopulation[0];
+var maxFitness = bestSolution.fitness;
+
+for (let i = 0; i < POPULATION_SIZE; i++) {
+  if (bestPopulation[i].fitness > maxFitness)
+    bestSolution = bestPopulation[i]
+}
+
+console.log(bestSolution.fitness)
+console.log(bestSolution.solution)
