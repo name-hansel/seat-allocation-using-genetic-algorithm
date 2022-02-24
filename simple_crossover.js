@@ -38,50 +38,46 @@ for (let i = b1; i <= b2; i++) {
   else elementsAlreadyPresentInOffspring[parentOne[i][0]] = 1;
 }
 
+console.log(b1, b2)
 console.log(parentOne)
 console.log(parentTwo)
-console.log(b1, b2)
 console.log(offspring)
-console.log(elementsAlreadyPresentInOffspring)
-console.log(numberOfElementsInOffspring)
-console.log(numberOfEmptySeats)
+// console.log(elementsAlreadyPresentInOffspring)
+// console.log(numberOfElementsInOffspring)
+// console.log(numberOfEmptySeats)
 
-// COPY GENES OTHER THAN BREAKPOINT
+// Extract roll no.s from parent 2, not present in offspring
+var index = (b2 + 1) % geneLength;
+var elementsToPush = [];
+do {
+  if (elementsAlreadyPresentInOffspring[parentTwo[index]] !== 1)
+    elementsToPush.push(parentTwo[index])
+  index = (index + 1) % geneLength;
+} while (index !== (b2 + 1) % geneLength);
+
 var i = (b2 + 1) % geneLength;
-var j = (b2 + 1) % geneLength;
-// ! PROBLEM IN j variable
-while (numberOfElementsInOffspring < geneLength) {
-  // Seat already present in offspring
-  if (!isSeatEmpty(parentTwo[j]) && elementsAlreadyPresentInOffspring[parentTwo[j][0]] === 1) {
-    j = (j + 1) % geneLength;
-    continue;
-  }
-
-  // Seat not present in offspring
-  if (!isSeatEmpty(parentTwo[j]) && elementsAlreadyPresentInOffspring[parentTwo[j][0]] !== 1) {
-    offspring[i] = parentTwo[j]
-    numberOfElementsInOffspring++;
+var j = 0;
+while (j < elementsToPush.length) {
+  // Seat is not empty, simply add to offspring
+  if (!isSeatEmpty(elementsToPush[j])) {
+    offspring[i] = elementsToPush[j];
+    j++;
     i = (i + 1) % geneLength;
-    j = (j + 1) % geneLength;
-    elementsAlreadyPresentInOffspring[parentTwo[j][0]] = 1;
     continue;
   }
 
-  // Seat is empty and number of empty seats is valid
-  if (isSeatEmpty(parentTwo[j]) && numberOfEmptySeats >= 3) {
-    j = (j + 1) % geneLength;
-    continue;
-  }
-
-  if (isSeatEmpty(parentTwo[j]) && numberOfEmptySeats < 3) {
+  // Seat is empty, check number of empty seats in offspring
+  if (numberOfEmptySeats < 3) {
+    // Add empty seat to offspring
     numberOfEmptySeats++;
-    numberOfElementsInOffspring++;
-    offspring[i] = parentTwo[j]
-    j = (j + 1) % geneLength;
+    offspring[i] = elementsToPush[j];
+    j++;
     i = (i + 1) % geneLength;
     continue;
+  } else {
+    // Number of empty seats has exceeded
+    j++;
   }
-  console.log("IMPOSSIBLE")
 }
 
 console.log(offspring)
