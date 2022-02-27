@@ -162,6 +162,7 @@ function initialiseChromosome({ data }) {
   }
   return chromosome;
 }
+
 /**
  * Returns two unique points lying between 0 and length of parent
  * @param {array} parentLength
@@ -172,12 +173,21 @@ function generateBreakpoints(parentLength) {
   return [breakPoint1, breakPoint2]
 }
 
+/**
+ * Returns two points lying between 0 and length of parent
+ * @param {array} parentLength
+ */
 function generateMutationPoints(parentLength) {
   var indexA = Math.floor(Math.random() * (parentLength - 1));
   var indexB = Math.floor(Math.random() * (parentLength - 1));
   return [indexA, indexB]
 }
 
+/**
+ * Returns mutated chromosome
+ * @param {array} chromosome
+ * @param {number} mutationRate
+ */
 function tworsMutate(chromosome, mutationRate) {
   const mutationChance = Math.random()
   // No mutation
@@ -197,6 +207,18 @@ function tworsMutate(chromosome, mutationRate) {
   return copyChromosome;
 }
 
+/**
+ * Returns average fitness of a generation
+ * @param {array} population
+ * @param {number} POPULATION_SIZE
+ */
+function calculateAverageFitnessForGeneration(population, POPULATION_SIZE) {
+  var totalGenerationFitness = 0;
+  for (let i = 0; i < POPULATION_SIZE; i++)
+    totalGenerationFitness += population[i].fitness;
+  return totalGenerationFitness / POPULATION_SIZE;
+}
+
 module.exports = {
   shuffleChromosome,
   getSubjectDissimilarity,
@@ -211,5 +233,6 @@ module.exports = {
   shuffleMatingPool,
   generateBreakpoints,
   generateMutationPoints,
-  tworsMutate
+  tworsMutate,
+  calculateAverageFitnessForGeneration
 }
