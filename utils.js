@@ -174,40 +174,6 @@ function generateBreakpoints(parentLength) {
 }
 
 /**
- * Returns two points lying between 0 and length of parent
- * @param {array} parentLength
- */
-function generateMutationPoints(parentLength) {
-  var indexA = Math.floor(Math.random() * (parentLength - 1));
-  var indexB = Math.floor(Math.random() * (parentLength - 1));
-  return [indexA, indexB]
-}
-
-/**
- * Returns mutated chromosome
- * @param {array} chromosome
- * @param {number} mutationRate
- */
-function tworsMutate(chromosome, mutationRate) {
-  const mutationChance = Math.random()
-  // No mutation
-  if (mutationRate < mutationChance)
-    return chromosome;
-
-  // Create copy of chromosome
-  const copyChromosome = [...chromosome];
-  // Choose 2 points in chromosome
-  const [indexA, indexB] = generateBreakpoints(chromosome.length);
-
-  // Swap students at the two points
-  var temp = copyChromosome[indexA][3];
-  copyChromosome[indexA][3] = copyChromosome[indexB][3];
-  copyChromosome[indexB][3] = temp;
-
-  return copyChromosome;
-}
-
-/**
  * Returns average fitness of a generation
  * @param {array} population
  * @param {number} POPULATION_SIZE
@@ -269,8 +235,6 @@ module.exports = {
   initialiseChromosome,
   shuffleMatingPool,
   generateBreakpoints,
-  generateMutationPoints,
-  tworsMutate,
   calculateAverageFitnessForGeneration,
   getAverageNumberOfSubjectsPerRoom,
   printLayout

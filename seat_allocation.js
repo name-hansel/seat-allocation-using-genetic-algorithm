@@ -1,13 +1,15 @@
 const fs = require("fs");
 const Papa = require("papaparse");
 
-const { shuffleChromosome, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour, isSeatEmpty, shuffleMatingPool, tworsMutate, calculateAverageFitnessForGeneration, printLayout } = require("./utils")
-const { elitismSelection } = require("./selection")
-const { orderOneCrossover } = require("./crossover")
+const { shuffleChromosome, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour, isSeatEmpty, shuffleMatingPool, calculateAverageFitnessForGeneration, printLayout } = require("./utils");
 
-const POPULATION_SIZE = 1000;
-const GENERATION_LIMIT = 500;
-const mutationRate = 0.03;
+const { elitismSelection } = require("./selection");
+const { orderOneCrossover } = require("./crossover");
+const { swapMutation, scrambleMutation } = require("./mutation");
+
+const POPULATION_SIZE = 100;
+const GENERATION_LIMIT = 1000;
+const MUTATION_RATE = 0.05;
 
 // Read subject details from csv file
 var csv = fs.readFileSync("subject_details.csv");
@@ -153,8 +155,8 @@ while (currentGeneration <= GENERATION_LIMIT) {
     const offspringB = orderOneCrossover(copyMatingPool[1], copyMatingPool[0], roomDetails, emptySeats)
 
     // Mutate offspring 1 and 2 here
-    const mutatedOffspringA = tworsMutate(offspringA, mutationRate);
-    const mutatedOffspringB = tworsMutate(offspringB, mutationRate);
+    const mutatedOffspringA = scrambleMutation(offspringA, MUTATION_RATE);
+    const mutatedOffspringB = scrambleMutation(offspringB, MUTATION_RATE);
 
     nextPopulation.push(mutatedOffspringA, mutatedOffspringB);
   }
