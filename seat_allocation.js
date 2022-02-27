@@ -1,13 +1,13 @@
 const fs = require("fs");
 const Papa = require("papaparse");
 
-const { shuffleChromosome, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour, isSeatEmpty, shuffleMatingPool, tworsMutate, calculateAverageFitnessForGeneration } = require("./utils")
+const { shuffleChromosome, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour, isSeatEmpty, shuffleMatingPool, tworsMutate, calculateAverageFitnessForGeneration, printLayout } = require("./utils")
 const { elitismSelection } = require("./selection")
 const { orderOneCrossover } = require("./crossover")
 
-const POPULATION_SIZE = 500;
-const GENERATION_LIMIT = 100;
-const mutationRate = 0.05
+const POPULATION_SIZE = 1000;
+const GENERATION_LIMIT = 500;
+const mutationRate = 0.03;
 
 // Read subject details from csv file
 var csv = fs.readFileSync("subject_details.csv");
@@ -54,7 +54,7 @@ for (let i = 0; i < roomDetails.data.length; i++) {
 }
 
 // Create population of chromosomes
-// Population is set of possible solutions aka chromosomes
+
 // A chromosome is a solution
 // Chromosome contains genes
 // Each gene is mapped to one seat and contains properties which define a seat (Room no., row, column, [ roll_number, subject ])
@@ -104,7 +104,7 @@ function fitnessValue(chromosome) {
       const subjectDissimilarity = subjectDissimilarityData[student[1]][neighbour[3][1]];
 
       // Calculate fitness
-      const fitness = (distance * subjectDissimilarity) / (Math.sqrt(Math.pow(Number(currentRoomDimensions[0]), 2) + Math.pow(Number(currentRoomDimensions[1]), 2)))
+      const fitness = Math.pow((distance * subjectDissimilarity), 2) / (Math.pow(Number(currentRoomDimensions[0]), 2) + Math.pow(Number(currentRoomDimensions[1]), 2));
 
       return fitness
     })
@@ -112,7 +112,11 @@ function fitnessValue(chromosome) {
     return getArraySum(geneFitness);
   })
 
-  return { solution: chromosome, fitness: Math.pow(getArraySum(fitnessForEachGene) / numberOfSeats, 4) }
+  // const avgNoOfSubjInEachRoom = getAverageNumberOfSubjectsPerRoom(chromosome, roomDetails.data.length);
+
+  const fitness = Math.pow(getArraySum(fitnessForEachGene), 4); // / Math.pow(avgNoOfSubjInEachRoom, 4);
+
+  return { solution: chromosome, fitness }
 }
 
 currentGeneration = 1;
@@ -125,15 +129,15 @@ while (currentGeneration <= GENERATION_LIMIT) {
   const averageGenerationFitness = calculateAverageFitnessForGeneration(populationWithCalculatedFitness, POPULATION_SIZE)
   console.log(`Generation: ${currentGeneration}\nAverage fitness: ${averageGenerationFitness}`)
 
-  // Add to graphPoints object
-  graphPoints.push({
-    generation: currentGeneration,
-    fitness: averageGenerationFitness
-  })
-
   // Sort solutions in a population based on fitness
   populationWithCalculatedFitness.sort((a, b) => {
     return b.fitness - a.fitness;
+  })
+
+  // Add to graphPoints object
+  graphPoints.push({
+    generation: currentGeneration,
+    fitness: populationWithCalculatedFitness[0].fitness
   })
 
   // Build a mating pool using any selection method
@@ -168,6 +172,7 @@ const bestPopulation = population.map(solution => fitnessValue(solution))
 bestPopulation.sort((a, b) => {
   return b.fitness - a.fitness;
 })
+
 var bestSolution = bestPopulation[0];
 var maxFitness = bestSolution.fitness;
 for (let i = 0; i < POPULATION_SIZE; i++) {
@@ -175,6 +180,6 @@ for (let i = 0; i < POPULATION_SIZE; i++) {
     bestSolution = bestPopulation[i]
 }
 
-console.log(bestSolution.fitness)
-console.log(bestSolution.solution)
-// console.log(graphPoints)
+// console.log(bestSolution.solution);
+console.log(bestSolution.fitness);
+printLayout(bestSolution.solution, roomDetails.data);

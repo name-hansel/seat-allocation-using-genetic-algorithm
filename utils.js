@@ -219,6 +219,43 @@ function calculateAverageFitnessForGeneration(population, POPULATION_SIZE) {
   return totalGenerationFitness / POPULATION_SIZE;
 }
 
+function getAverageNumberOfSubjectsPerRoom(chromosome, numberOfRooms) {
+  // Get average number of subjects in each room
+  var currentRoom = chromosome[0][0];
+  const numberOfSubjectsInEachRoom = [];
+  const subjectsInCurrentRoom = [];
+  for (let i = 0; i < chromosome.length; i++) {
+    if (chromosome[i][0] !== currentRoom) {
+      // Get number of subjects in current room
+      numberOfSubjectsInEachRoom.push(new Set(subjectsInCurrentRoom).size);
+
+      // Set current room as new room
+      currentRoom = chromosome[i][0];
+      subjectsInCurrentRoom.length = 0;
+    }
+    subjectsInCurrentRoom.push(chromosome[i][3][1]);
+  }
+
+  const averageNumberOfSubjectsInEachRoom = getArraySum(numberOfSubjectsInEachRoom) / numberOfRooms;
+  return averageNumberOfSubjectsInEachRoom;
+
+}
+
+function printLayout(chromosome, roomDetails) {
+  let seat = 0;
+  for (let room = 0; room < roomDetails.length; room++) {
+    console.log(`Room No. ${room + 1}`)
+    for (let row = 0; row < roomDetails[room][0]; row++) {
+      for (let col = 0; col < roomDetails[room][1]; col++) {
+        process.stdout.write(`${chromosome[seat][3][1]}\t`);
+        seat++;
+      }
+      process.stdout.write("\n");
+    }
+    process.stdout.write("\n\n");
+  }
+}
+
 module.exports = {
   shuffleChromosome,
   getSubjectDissimilarity,
@@ -234,5 +271,7 @@ module.exports = {
   generateBreakpoints,
   generateMutationPoints,
   tworsMutate,
-  calculateAverageFitnessForGeneration
+  calculateAverageFitnessForGeneration,
+  getAverageNumberOfSubjectsPerRoom,
+  printLayout
 }
