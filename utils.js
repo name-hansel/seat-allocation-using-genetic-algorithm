@@ -3,7 +3,7 @@
  * @param {array} chromosome Chromosome to be shuffled
  */
 function shuffleChromosome(chromosome) {
-  const returnChromosome = [...chromosome]
+  const returnChromosome = JSON.parse(JSON.stringify(chromosome));
   for (var i = returnChromosome.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
     var temp = returnChromosome[i][3];
@@ -17,7 +17,7 @@ function shuffleChromosome(chromosome) {
  * @param {array} population Population to be shuffled
  */
 function shuffleMatingPool(population) {
-  const returnPopulation = [...population]
+  const returnPopulation = JSON.parse(JSON.stringify(population));
   for (var i = returnPopulation.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
     var temp = returnPopulation[i];

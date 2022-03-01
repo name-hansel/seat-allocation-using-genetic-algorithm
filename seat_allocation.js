@@ -5,7 +5,7 @@ const { shuffleChromosome, getSubjectDissimilarity, getNumberOfSeats, getArraySu
 
 const { elitismSelection } = require("./selection");
 const { orderOneCrossover } = require("./crossover");
-const { swapMutation, scrambleMutation } = require("./mutation");
+const { swapMutation, scrambleMutation, inversionMutation } = require("./mutation");
 
 const POPULATION_SIZE = 100;
 const GENERATION_LIMIT = 1000;
@@ -155,8 +155,8 @@ while (currentGeneration <= GENERATION_LIMIT) {
     const offspringB = orderOneCrossover(copyMatingPool[1], copyMatingPool[0], roomDetails, emptySeats)
 
     // Mutate offspring 1 and 2 here
-    const mutatedOffspringA = scrambleMutation(offspringA, MUTATION_RATE);
-    const mutatedOffspringB = scrambleMutation(offspringB, MUTATION_RATE);
+    const mutatedOffspringA = inversionMutation(offspringA, MUTATION_RATE);
+    const mutatedOffspringB = inversionMutation(offspringB, MUTATION_RATE);
 
     nextPopulation.push(mutatedOffspringA, mutatedOffspringB);
   }

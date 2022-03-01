@@ -10,6 +10,17 @@ function generateMutationPoints(parentLength) {
   return [indexA, indexB]
 }
 
+
+function inverseChromosome(chromosome) {
+  const invertedChromosome = JSON.parse(JSON.stringify(chromosome));
+  const chromosomeLength = chromosome.length;
+
+  for (let i = 0; i < chromosomeLength; i++) {
+    invertedChromosome[chromosomeLength - 1 - i][3] = chromosome[i][3];
+  }
+  return invertedChromosome;
+}
+
 /**
  * Returns mutated chromosome
  * @param {array} chromosome
@@ -23,7 +34,7 @@ function swapMutation(chromosome, mutationRate) {
     return chromosome;
 
   // Create copy of chromosome
-  const copyChromosome = [...chromosome];
+  const copyChromosome = JSON.parse(JSON.stringify(chromosome));
 
   // Choose 2 points in chromosome
   const [indexA, indexB] = generateMutationPoints(copyChromosome.length);
@@ -49,7 +60,7 @@ function scrambleMutation(chromosome, mutationRate) {
     return chromosome;
 
   // Create copy of chromosome
-  const copyChromosome = [...chromosome];
+  const copyChromosome = JSON.parse(JSON.stringify(chromosome));
 
   // Choose 2 points in chromosome
   var [indexA, indexB] = generateMutationPoints(copyChromosome.length);
@@ -67,6 +78,33 @@ function scrambleMutation(chromosome, mutationRate) {
   ];
 }
 
+function inversionMutation(chromosome, mutationRate) {
+  const mutationChance = Math.random();
+
+  // No mutation
+  if (mutationRate < mutationChance)
+    return chromosome;
+
+  // Create copy of chromosome
+  const copyChromosome = JSON.parse(JSON.stringify(chromosome));
+
+  // Choose 2 points in chromosome
+  var [indexA, indexB] = generateMutationPoints(copyChromosome.length);
+  if (indexA > indexB)
+    [indexB, indexA] = [indexA, indexB];
+
+  // Inverse genes in this range
+  const invertedChromosome = inverseChromosome(copyChromosome.slice(indexA, indexB + 1));
+
+  // Return original and inverted elements as a chromosome in order
+  return [
+    ...copyChromosome.slice(0, indexA),
+    ...invertedChromosome,
+    ...copyChromosome.slice(indexB + 1)
+  ];
+}
+
+
 function insertionMutation() {
   // 1(2)34(5)6789 -> 125346789
 }
@@ -74,5 +112,6 @@ function insertionMutation() {
 module.exports = {
   swapMutation,
   scrambleMutation,
-  insertionMutation
+  insertionMutation,
+  inversionMutation
 }
