@@ -7,9 +7,9 @@ const { elitismSelection } = require("./selection");
 const { orderOneCrossover } = require("./crossover");
 const { swapMutation, scrambleMutation, inversionMutation } = require("./mutation");
 
-const POPULATION_SIZE = 100;
-const GENERATION_LIMIT = 1000;
-const MUTATION_RATE = 0.05;
+const POPULATION_SIZE = 300;
+const GENERATION_LIMIT = 750;
+const MUTATION_RATE = 0.03;
 
 // Read subject details from csv file
 var csv = fs.readFileSync("subject_details.csv");
@@ -116,7 +116,7 @@ function fitnessValue(chromosome) {
 
   // const avgNoOfSubjInEachRoom = getAverageNumberOfSubjectsPerRoom(chromosome, roomDetails.data.length);
 
-  const fitness = Math.pow(getArraySum(fitnessForEachGene), 4); // / Math.pow(avgNoOfSubjInEachRoom, 4);
+  const fitness = Math.pow(getArraySum(fitnessForEachGene) / numberOfSeats, 2); // / Math.pow(avgNoOfSubjInEachRoom, 4);
 
   return { solution: chromosome, fitness }
 }
@@ -155,8 +155,8 @@ while (currentGeneration <= GENERATION_LIMIT) {
     const offspringB = orderOneCrossover(copyMatingPool[1], copyMatingPool[0], roomDetails, emptySeats)
 
     // Mutate offspring 1 and 2 here
-    const mutatedOffspringA = inversionMutation(offspringA, MUTATION_RATE);
-    const mutatedOffspringB = inversionMutation(offspringB, MUTATION_RATE);
+    const mutatedOffspringA = swapMutation(offspringA, MUTATION_RATE);
+    const mutatedOffspringB = swapMutation(offspringB, MUTATION_RATE);
 
     nextPopulation.push(mutatedOffspringA, mutatedOffspringB);
   }
