@@ -3,7 +3,7 @@ const Papa = require("papaparse");
 
 const { shuffleChromosome, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour, isSeatEmpty, shuffleMatingPool, calculateAverageFitnessForGeneration, printLayout } = require("./utils");
 
-const { elitismSelection, rouletteWheelSelection } = require("./selection");
+const { elitismSelection, rouletteWheelSelection, tournamentSelection } = require("./selection");
 const { orderOneCrossover } = require("./crossover");
 const { swapMutation, scrambleMutation, inversionMutation } = require("./mutation");
 
@@ -143,7 +143,8 @@ while (currentGeneration <= GENERATION_LIMIT) {
 
   // Build a mating pool using any selection method
   // const [matingPool, nextPopulation] = elitismSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE);
-  const [matingPool, nextPopulation] = rouletteWheelSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE);
+  // const [matingPool, nextPopulation] = rouletteWheelSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE);
+  const [matingPool, nextPopulation] = tournamentSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE)
 
   // While next population is not full, keep generating offsprings using random parents from mating pool
   while (nextPopulation.length < POPULATION_SIZE) {
