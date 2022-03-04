@@ -3,12 +3,12 @@ const Papa = require("papaparse");
 
 const { shuffleChromosome, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour, isSeatEmpty, shuffleMatingPool, calculateAverageFitnessForGeneration, printLayout } = require("./utils");
 
-const { elitismSelection } = require("./selection");
+const { elitismSelection, rouletteWheelSelection } = require("./selection");
 const { orderOneCrossover } = require("./crossover");
 const { swapMutation, scrambleMutation, inversionMutation } = require("./mutation");
 
-const POPULATION_SIZE = 300;
-const GENERATION_LIMIT = 750;
+const POPULATION_SIZE = 100;
+const GENERATION_LIMIT = 300;
 const MUTATION_RATE = 0.03;
 
 // Read subject details from csv file
@@ -33,8 +33,7 @@ const numberOfStudents = studentDetails.data.length
 const emptySeats = numberOfSeats - numberOfStudents;
 
 if (emptySeats < 0) {
-  console.log("Insufficient number of seats");
-  return;
+  throw new Error('Insufficient number of seats');
 }
 
 const graphPoints = [];
@@ -143,7 +142,8 @@ while (currentGeneration <= GENERATION_LIMIT) {
   })
 
   // Build a mating pool using any selection method
-  const [matingPool, nextPopulation] = elitismSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE);
+  // const [matingPool, nextPopulation] = elitismSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE);
+  const [matingPool, nextPopulation] = rouletteWheelSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE);
 
   // While next population is not full, keep generating offsprings using random parents from mating pool
   while (nextPopulation.length < POPULATION_SIZE) {

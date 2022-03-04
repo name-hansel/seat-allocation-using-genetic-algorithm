@@ -8,7 +8,7 @@ function elitismSelection(population, percentageOfElite, POPULATION_SIZE) {
   const matingPool = [];
   const newPopulation = [];
 
-  var numberOfParentsToCarryOver = parseInt((percentageOfElite / 100) * POPULATION_SIZE);
+  const numberOfParentsToCarryOver = parseInt((percentageOfElite / 100) * POPULATION_SIZE);
 
   // If number of parents is 1, increment by 1 since crossover needs atleast 2 parents
   if (numberOfParentsToCarryOver === 1) numberOfParentsToCarryOver++;
@@ -22,8 +22,35 @@ function elitismSelection(population, percentageOfElite, POPULATION_SIZE) {
   return [matingPool.map(gene => gene.solution), newPopulation.map(gene => gene.solution)];
 }
 
-function rouletteWheelSelection(population) {
-  const matingPool = []
+/**
+ * Creates mating pool by assigning probabilities to each solution which corresponds to their fitness value i.e., chromosomes with higher fitness value have a higher probability of being chosen
+ * @param {array} population Current population using which the mating pool will be built
+ * @param {aumber} sizeOfMatingPool Size of the mating pool which has to be generated
+ * @param {number} POPULATION_SIZE Size of population
+ */
+function rouletteWheelSelection(population, sizeOfMatingPool, POPULATION_SIZE) {
+  const matingPool = [];
+
+  // Get total fitness of the entire population
+  let totalFitnessOfPopulation = 0;
+  for (let i = 0; i < POPULATION_SIZE; i++)
+    totalFitnessOfPopulation += population[i].fitness;
+
+  // Calculate probability for each chromosome in the population
+  for (let i = 0; i < POPULATION_SIZE; i++) {
+    population[i].probability = population[i].fitness / totalFitnessOfPopulation;
+  }
+
+  // Generate a random number (between 0 and 1) and if probability is greater than the number generated, add it to the mating pool
+  // Do this until we get a mating pool of population size
+  while (matingPool.length < sizeOfMatingPool) {
+    const randomNumber = Math.floor(Math.random());
+    for (let i = 0; i < POPULATION_SIZE && matingPool.length < sizeOfMatingPool; i++) {
+      if (population[i].probability > randomNumber)
+        matingPool.push(population[i]);
+    }
+  }
+
   return [matingPool.map(gene => gene.solution), []]
 }
 
