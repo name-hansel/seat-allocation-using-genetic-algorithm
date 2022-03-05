@@ -222,6 +222,16 @@ function printLayout(chromosome, roomDetails) {
   }
 }
 
+function minimumFitness(fitness) {
+  const length = fitness.length;
+  var min = fitness[0];
+  for (let i = 0; i < length; i++) {
+    if (fitness[i] < min)
+      min = fitness[i];
+  }
+  return min;
+}
+
 module.exports = {
   shuffleChromosome,
   getSubjectDissimilarity,
@@ -237,5 +247,6 @@ module.exports = {
   generateBreakpoints,
   calculateAverageFitnessForGeneration,
   getAverageNumberOfSubjectsPerRoom,
-  printLayout
+  printLayout,
+  minimumFitness
 }

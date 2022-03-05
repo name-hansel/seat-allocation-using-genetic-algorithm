@@ -1,13 +1,13 @@
 const fs = require("fs");
 const Papa = require("papaparse");
 
-const { shuffleChromosome, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour, isSeatEmpty, shuffleMatingPool, calculateAverageFitnessForGeneration, printLayout } = require("./utils");
+const { shuffleChromosome, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour, isSeatEmpty, shuffleMatingPool, calculateAverageFitnessForGeneration, printLayout, minimumFitness } = require("./utils");
 
 const { elitismSelection, rouletteWheelSelection, tournamentSelection } = require("./selection");
-const { orderOneCrossover } = require("./crossover");
+const { orderOneCrossover, alternatingCrossover } = require("./crossover");
 const { swapMutation, scrambleMutation, inversionMutation } = require("./mutation");
 
-const POPULATION_SIZE = 100;
+const POPULATION_SIZE = 1000;
 const GENERATION_LIMIT = 300;
 const MUTATION_RATE = 0.03;
 
@@ -56,8 +56,7 @@ for (let i = 0; i < roomDetails.data.length; i++) {
 
 // Create population of chromosomes
 
-// A chromosome is a solution
-// Chromosome contains genes
+// A chromosome is a solution; chromosome contains genes
 // Each gene is mapped to one seat and contains properties which define a seat (Room no., row, column, [ roll_number, subject ])
 const population = []
 
@@ -110,7 +109,10 @@ function fitnessValue(chromosome) {
       return fitness
     })
 
-    return getArraySum(geneFitness);
+    // Get minimum fitness among the 4 neighbors
+    // This fitness value will be considered for a seat/gene
+    return minimumFitness(geneFitness);
+    // return getArraySum(geneFitness);
   })
 
   // const avgNoOfSubjInEachRoom = getAverageNumberOfSubjectsPerRoom(chromosome, roomDetails.data.length);
@@ -123,12 +125,14 @@ function fitnessValue(chromosome) {
 currentGeneration = 1;
 // Start iterating through generations
 while (currentGeneration <= GENERATION_LIMIT) {
+  console.log(`Generation: ${currentGeneration}`)
+
   // Calculate fitness of each chromosome (solution) in population and store
   const populationWithCalculatedFitness = population.map(solution => fitnessValue(solution))
 
   // Calculate average fitness for a generation and print it
-  const averageGenerationFitness = calculateAverageFitnessForGeneration(populationWithCalculatedFitness, POPULATION_SIZE)
-  console.log(`Generation: ${currentGeneration}\nAverage fitness: ${averageGenerationFitness}`)
+  // const averageGenerationFitness = calculateAverageFitnessForGeneration(populationWithCalculatedFitness, POPULATION_SIZE)
+  // console.log(`Generation: ${currentGeneration}\nAverage fitness: ${averageGenerationFitness}`)
 
   // Sort solutions in a population based on fitness
   populationWithCalculatedFitness.sort((a, b) => {
@@ -144,7 +148,7 @@ while (currentGeneration <= GENERATION_LIMIT) {
   // Build a mating pool using any selection method
   // const [matingPool, nextPopulation] = elitismSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE);
   // const [matingPool, nextPopulation] = rouletteWheelSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE);
-  const [matingPool, nextPopulation] = tournamentSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE)
+  const [matingPool, nextPopulation] = tournamentSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE);
 
   // While next population is not full, keep generating offsprings using random parents from mating pool
   while (nextPopulation.length < POPULATION_SIZE) {
@@ -153,7 +157,7 @@ while (currentGeneration <= GENERATION_LIMIT) {
 
     // Crossover using first 2 elements of shuffled mating pool
     const offspringA = orderOneCrossover(copyMatingPool[0], copyMatingPool[1], roomDetails, emptySeats);
-    const offspringB = orderOneCrossover(copyMatingPool[1], copyMatingPool[0], roomDetails, emptySeats)
+    const offspringB = orderOneCrossover(copyMatingPool[1], copyMatingPool[0], roomDetails, emptySeats);
 
     // Mutate offspring 1 and 2 here
     const mutatedOffspringA = swapMutation(offspringA, MUTATION_RATE);

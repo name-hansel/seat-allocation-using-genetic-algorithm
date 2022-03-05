@@ -12,8 +12,6 @@ function orderOneCrossover(parentOne, parentTwo, roomDetails, emptySeats) {
   // Create object which indicates which seats are already present in offspring
   const elementsAlreadyPresentInOffspring = {};
 
-  // Keep track of number of elements added to offspring
-
   // Keep track of number of empty seats in offspring
   var numberOfEmptySeats = 0;
 
@@ -61,6 +59,48 @@ function orderOneCrossover(parentOne, parentTwo, roomDetails, emptySeats) {
       // Number of empty seats has exceeded
       j++;
     }
+  }
+
+  return offspring
+}
+
+function alternatingCrossover(parentOne, parentTwo, roomDetails, emptySeats) {
+  const geneLength = parentOne.length;
+
+  // Initialize offspring using room details
+  const offspring = initialiseChromosome(roomDetails);
+
+  // Create object which contains seats already present in offspring
+  const elementsAlreadyPresentInOffspring = {};
+
+  // Keep track of number of empty seats in offspring
+  var numberOfEmptySeats = 0;
+
+  const parents = [parentOne, parentTwo];
+  var currentParent = 0;
+
+  // Gene position in parent
+  var j = 0;
+  // Gene position in offspring
+  var i = 0;
+
+  for (; i < geneLength; j = (j + 1) % geneLength) {
+    parent = parents[currentParent];
+    if (isSeatEmpty(parent[j])) {
+      if (numberOfEmptySeats < emptySeats) {
+        offspring[i][3] = parent[j][3];
+        numberOfEmptySeats++;
+        i++;
+      }
+
+    } else {
+      if (elementsAlreadyPresentInOffspring[parent[j]] !== 1) {
+        offspring[i][3] = parent[j][3];
+        elementsAlreadyPresentInOffspring[parent[j]] = 1;
+        i++;
+      }
+    }
+    currentParent = (currentParent + 1) % 2;
   }
 
   return offspring
@@ -127,5 +167,6 @@ function partiallyMappedCrossover() {
 }
 
 module.exports = {
-  orderOneCrossover
+  orderOneCrossover,
+  alternatingCrossover
 }
