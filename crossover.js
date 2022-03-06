@@ -68,7 +68,7 @@ function alternatingCrossover(parentOne, parentTwo, roomDetails, emptySeats) {
   const geneLength = parentOne.length;
 
   // Initialize offspring using room details
-  const offspring = initialiseChromosome(roomDetails);
+  const offspring = parentOne.map((seat) => [seat[0], seat[1], seat[2], [null]]);
 
   // Create object which contains seats already present in offspring
   const elementsAlreadyPresentInOffspring = {};
@@ -79,28 +79,55 @@ function alternatingCrossover(parentOne, parentTwo, roomDetails, emptySeats) {
   const parents = [parentOne, parentTwo];
   var currentParent = 0;
 
-  // Gene position in parent
-  var j = 0;
-  // Gene position in offspring
-  var i = 0;
-
-  for (; i < geneLength; j = (j + 1) % geneLength) {
+  // TODO write cleaner code.
+  for (let i = 0; i < geneLength; i++, currentParent = (currentParent + 1) % 2) {
     parent = parents[currentParent];
-    if (isSeatEmpty(parent[j])) {
+    if (isSeatEmpty(parent[i])) {
       if (numberOfEmptySeats < emptySeats) {
-        offspring[i][3] = parent[j][3];
+        offspring[i][3] = parent[i][3];
         numberOfEmptySeats++;
-        i++;
       }
-
     } else {
-      if (elementsAlreadyPresentInOffspring[parent[j]] !== 1) {
-        offspring[i][3] = parent[j][3];
-        elementsAlreadyPresentInOffspring[parent[j]] = 1;
-        i++;
+      if (elementsAlreadyPresentInOffspring[parent[i][3][0]] !== 1) {
+        offspring[i][3] = parent[i][3];
+        elementsAlreadyPresentInOffspring[parent[i][3][0]] = 1;
       }
     }
-    currentParent = (currentParent + 1) % 2;
+  }
+
+  let i = 0, j = 0;
+  while (i < geneLength) {
+    if (isSeatEmpty(offspring[i])) {
+      i++;
+      continue;
+    }
+
+    if (offspring[i][3][0] !== null) {
+      i++;
+      continue;
+    }
+    if (isSeatEmpty(parentTwo[j])) {
+      if (numberOfEmptySeats < emptySeats) {
+        offspring[i][3] = parentTwo[j][3];
+        i++;
+        j++;
+        continue;
+      } else {
+        j++;
+        continue;
+      }
+    } else {
+      if (elementsAlreadyPresentInOffspring[parentTwo[j][3][0]] === 1) {
+        j++;
+        continue;
+      } else {
+        offspring[i][3] = parentTwo[j][3];
+        elementsAlreadyPresentInOffspring[parentTwo[j][3][0]] = 1;
+        i++;
+        j++;
+        continue;
+      }
+    }
   }
 
   return offspring

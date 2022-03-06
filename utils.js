@@ -213,7 +213,7 @@ function printLayout(chromosome, roomDetails) {
     console.log(`Room No. ${room + 1}`)
     for (let row = 0; row < roomDetails[room][0]; row++) {
       for (let col = 0; col < roomDetails[room][1]; col++) {
-        process.stdout.write(`${chromosome[seat][3][1]}\t`);
+        process.stdout.write(`${chromosome[seat][3][0]}: ${chromosome[seat][3][1]}\t\t`);
         seat++;
       }
       process.stdout.write("\n");

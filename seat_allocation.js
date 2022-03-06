@@ -7,7 +7,7 @@ const { elitismSelection, rouletteWheelSelection, tournamentSelection } = requir
 const { orderOneCrossover, alternatingCrossover } = require("./crossover");
 const { swapMutation, scrambleMutation, inversionMutation } = require("./mutation");
 
-const POPULATION_SIZE = 1000;
+const POPULATION_SIZE = 100;
 const GENERATION_LIMIT = 300;
 const MUTATION_RATE = 0.03;
 
@@ -156,8 +156,8 @@ while (currentGeneration <= GENERATION_LIMIT) {
     const copyMatingPool = shuffleMatingPool(matingPool);
 
     // Crossover using first 2 elements of shuffled mating pool
-    const offspringA = orderOneCrossover(copyMatingPool[0], copyMatingPool[1], roomDetails, emptySeats);
-    const offspringB = orderOneCrossover(copyMatingPool[1], copyMatingPool[0], roomDetails, emptySeats);
+    const offspringA = alternatingCrossover(copyMatingPool[0], copyMatingPool[1], roomDetails, emptySeats);
+    const offspringB = alternatingCrossover(copyMatingPool[1], copyMatingPool[0], roomDetails, emptySeats);
 
     // Mutate offspring 1 and 2 here
     const mutatedOffspringA = swapMutation(offspringA, MUTATION_RATE);
@@ -187,6 +187,5 @@ for (let i = 0; i < POPULATION_SIZE; i++) {
     bestSolution = bestPopulation[i]
 }
 
-// console.log(bestSolution.solution);
 console.log(bestSolution.fitness);
 printLayout(bestSolution.solution, roomDetails.data);
