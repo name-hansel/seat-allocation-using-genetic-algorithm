@@ -7,8 +7,8 @@ const { elitismSelection, rouletteWheelSelection, tournamentSelection } = requir
 const { orderOneCrossover, alternatingCrossover } = require("./crossover");
 const { swapMutation, scrambleMutation, inversionMutation } = require("./mutation");
 
-const POPULATION_SIZE = 100;
-const GENERATION_LIMIT = 300;
+const POPULATION_SIZE = 1000;
+const GENERATION_LIMIT = 200;
 const MUTATION_RATE = 0.03;
 
 // Read subject details from csv file
@@ -55,7 +55,6 @@ for (let i = 0; i < roomDetails.data.length; i++) {
 }
 
 // Create population of chromosomes
-
 // A chromosome is a solution; chromosome contains genes
 // Each gene is mapped to one seat and contains properties which define a seat (Room no., row, column, [ roll_number, subject ])
 const population = []
@@ -146,9 +145,7 @@ while (currentGeneration <= GENERATION_LIMIT) {
   })
 
   // Build a mating pool using any selection method
-  // const [matingPool, nextPopulation] = elitismSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE);
-  // const [matingPool, nextPopulation] = rouletteWheelSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE);
-  const [matingPool, nextPopulation] = tournamentSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE);
+  const [matingPool, nextPopulation] = elitismSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE);
 
   // While next population is not full, keep generating offsprings using random parents from mating pool
   while (nextPopulation.length < POPULATION_SIZE) {
@@ -156,8 +153,8 @@ while (currentGeneration <= GENERATION_LIMIT) {
     const copyMatingPool = shuffleMatingPool(matingPool);
 
     // Crossover using first 2 elements of shuffled mating pool
-    const offspringA = alternatingCrossover(copyMatingPool[0], copyMatingPool[1], roomDetails, emptySeats);
-    const offspringB = alternatingCrossover(copyMatingPool[1], copyMatingPool[0], roomDetails, emptySeats);
+    const offspringA = orderOneCrossover(copyMatingPool[0], copyMatingPool[1], roomDetails, emptySeats);
+    const offspringB = orderOneCrossover(copyMatingPool[1], copyMatingPool[0], roomDetails, emptySeats);
 
     // Mutate offspring 1 and 2 here
     const mutatedOffspringA = swapMutation(offspringA, MUTATION_RATE);

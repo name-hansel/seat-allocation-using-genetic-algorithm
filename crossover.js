@@ -64,7 +64,18 @@ function orderOneCrossover(parentOne, parentTwo, roomDetails, emptySeats) {
   return offspring
 }
 
-function alternatingCrossover(parentOne, parentTwo, roomDetails, emptySeats) {
+function shuffleArray(array) {
+  const returnArray = JSON.parse(JSON.stringify(array));
+  for (var i = returnArray.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = returnArray[i];
+    returnArray[i] = returnArray[j];
+    returnArray[j] = temp;
+  }
+  return returnArray;
+}
+
+function alternatingCrossover(parentOne, parentTwo, emptySeats) {
   const geneLength = parentOne.length;
 
   // Initialize offspring using room details
@@ -80,6 +91,7 @@ function alternatingCrossover(parentOne, parentTwo, roomDetails, emptySeats) {
   var currentParent = 0;
 
   // TODO write cleaner code.
+  // Copy alternate genes (only legal seats)
   for (let i = 0; i < geneLength; i++, currentParent = (currentParent + 1) % 2) {
     parent = parents[currentParent];
     if (isSeatEmpty(parent[i])) {
@@ -95,39 +107,29 @@ function alternatingCrossover(parentOne, parentTwo, roomDetails, emptySeats) {
     }
   }
 
-  let i = 0, j = 0;
-  while (i < geneLength) {
-    if (isSeatEmpty(offspring[i])) {
-      i++;
-      continue;
+  // Get all elements not present in offspring
+  const notPresentInOffspring = [];
+  for (let i = 0; i < geneLength; i++) {
+    if (isSeatEmpty(parentTwo[i])) continue;
+    if (elementsAlreadyPresentInOffspring[parentTwo[i][3][0]] !== 1) {
+      notPresentInOffspring.push(parentTwo[i][3]);
     }
+  }
 
-    if (offspring[i][3][0] !== null) {
-      i++;
-      continue;
-    }
-    if (isSeatEmpty(parentTwo[j])) {
-      if (numberOfEmptySeats < emptySeats) {
-        offspring[i][3] = parentTwo[j][3];
-        i++;
-        j++;
-        continue;
-      } else {
-        j++;
-        continue;
-      }
-    } else {
-      if (elementsAlreadyPresentInOffspring[parentTwo[j][3][0]] === 1) {
-        j++;
-        continue;
-      } else {
-        offspring[i][3] = parentTwo[j][3];
-        elementsAlreadyPresentInOffspring[parentTwo[j][3][0]] = 1;
-        i++;
-        j++;
-        continue;
-      }
-    }
+  // Get number of empty seats required
+  if (numberOfEmptySeats < emptySeats) {
+    const numberOfEmptySeatsReq = emptySeats - numberOfEmptySeats;
+    for (let i = 1; i <= numberOfEmptySeatsReq; i++) notPresentInOffspring.push([]);
+  }
+
+  // const shuffledNotPresentInOffspring = shuffleArray(notPresentInOffspring);
+
+  let j = 0;
+  for (let i = 0; i < geneLength; i++) {
+    if (isSeatEmpty(offspring[i])) continue;
+    if (!isSeatEmpty(offspring[i]) && offspring[i][3][0] !== null) continue;
+    offspring[i][3] = notPresentInOffspring[j];
+    j++;
   }
 
   return offspring
