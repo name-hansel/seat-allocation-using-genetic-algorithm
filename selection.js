@@ -77,7 +77,7 @@ function chooseRandomTeams(population, POPULATION_SIZE, k) {
  */
 function tournamentSelection(population, sizeOfMatingPool, POPULATION_SIZE) {
   const matingPool = [];
-  const k = 4;
+  const k = 7;
 
   while (matingPool.length < sizeOfMatingPool) {
     // Select k random teams from population

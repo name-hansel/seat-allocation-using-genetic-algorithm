@@ -7,7 +7,7 @@ const { elitismSelection, rouletteWheelSelection, tournamentSelection } = requir
 const { orderOneCrossover, alternatingCrossover } = require("./crossover");
 const { swapMutation, scrambleMutation, inversionMutation } = require("./mutation");
 
-const POPULATION_SIZE = 1000;
+const POPULATION_SIZE = 500;
 const GENERATION_LIMIT = 200;
 const MUTATION_RATE = 0.03;
 
@@ -146,6 +146,8 @@ while (currentGeneration <= GENERATION_LIMIT) {
 
   // Build a mating pool using any selection method
   const [matingPool, nextPopulation] = elitismSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE);
+  // const [matingPool, nextPopulation] = rouletteWheelSelection(populationWithCalculatedFitness, POPULATION_SIZE/5, POPULATION_SIZE);
+  // const [matingPool, nextPopulation] = tournamentSelection(populationWithCalculatedFitness, POPULATION_SIZE / 5, POPULATION_SIZE);
 
   // While next population is not full, keep generating offsprings using random parents from mating pool
   while (nextPopulation.length < POPULATION_SIZE) {
