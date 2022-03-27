@@ -1,14 +1,15 @@
+console.time("start")
 const fs = require("fs");
 const Papa = require("papaparse");
 
 const { shuffleChromosome, getSubjectDissimilarity, getNumberOfSeats, getArraySum, getDistanceBetweenNeighbours, getNeighbourDetails, isValidNeighbour, isSeatEmpty, shuffleMatingPool, calculateAverageFitnessForGeneration, printLayout, minimumFitness } = require("./utils");
 
 const { elitismSelection, rouletteWheelSelection, tournamentSelection } = require("./selection");
-const { orderOneCrossover, alternatingCrossover } = require("./crossover");
+const { orderOneCrossover, alternatingCrossover, partiallyMappedCrossover } = require("./crossover");
 const { swapMutation, scrambleMutation, inversionMutation } = require("./mutation");
 
-const POPULATION_SIZE = 500;
-const GENERATION_LIMIT = 200;
+const POPULATION_SIZE = 300;
+const GENERATION_LIMIT = 1000;
 const MUTATION_RATE = 0.03;
 
 // Read subject details from csv file
@@ -85,7 +86,8 @@ function fitnessValue(chromosome) {
     if (isSeatEmpty(gene)) return 0;
 
     // Get neighbours of a particular seat
-    var neighbours = [[row - 1, column], [row, column - 1], [row, column + 1], [row + 1, column]];
+    var neighbours = [[row - 1, column], [row, column - 1], [row, column + 1], [row + 1, column],
+    [row - 1, column + 1], [row - 1, column - 1], [row + 1, column - 1], [row + 1, column + 1]];
     var validNeighbours = neighbours.filter(neighbour => isValidNeighbour(neighbour, currentRoomDimensions));
 
     // Get subject details of each neighbour
@@ -103,20 +105,16 @@ function fitnessValue(chromosome) {
       const subjectDissimilarity = subjectDissimilarityData[student[1]][neighbour[3][1]];
 
       // Calculate fitness
-      const fitness = Math.pow((distance * subjectDissimilarity), 2) / (Math.pow(Number(currentRoomDimensions[0]), 2) + Math.pow(Number(currentRoomDimensions[1]), 2));
+      const fitness = (distance * subjectDissimilarity) / ((Math.pow(Number(currentRoomDimensions[0]), 2)) + Math.pow(Number(currentRoomDimensions[1]), 2));
 
       return fitness
     })
 
-    // Get minimum fitness among the 4 neighbors
-    // This fitness value will be considered for a seat/gene
-    return minimumFitness(geneFitness);
-    // return getArraySum(geneFitness);
+    // Return average of 8 neighbours for each seat
+    return getArraySum(geneFitness) / 8;
   })
 
-  // const avgNoOfSubjInEachRoom = getAverageNumberOfSubjectsPerRoom(chromosome, roomDetails.data.length);
-
-  const fitness = Math.pow(getArraySum(fitnessForEachGene) / numberOfSeats, 2); // / Math.pow(avgNoOfSubjInEachRoom, 4);
+  const fitness = getArraySum(fitnessForEachGene) / numberOfSeats;
 
   return { solution: chromosome, fitness }
 }
@@ -188,3 +186,4 @@ for (let i = 0; i < POPULATION_SIZE; i++) {
 
 console.log(bestSolution.fitness);
 printLayout(bestSolution.solution, roomDetails.data);
+console.timeEnd("start")

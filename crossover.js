@@ -90,7 +90,6 @@ function alternatingCrossover(parentOne, parentTwo, emptySeats) {
   const parents = [parentOne, parentTwo];
   var currentParent = 0;
 
-  // TODO write cleaner code.
   // Copy alternate genes (only legal seats)
   for (let i = 0; i < geneLength; i++, currentParent = (currentParent + 1) % 2) {
     parent = parents[currentParent];
@@ -135,67 +134,117 @@ function alternatingCrossover(parentOne, parentTwo, emptySeats) {
   return offspring
 }
 
-// Partially mapped crossover
-function partiallyMappedCrossover() {
-  // https://github.com/dwdyer/watchmaker/blob/master/framework/src/java/main/org/uncommons/watchmaker/framework/operators/ListOrderCrossover.java
+// Partially mapped crossover (PMX)
+function partiallyMappedCrossover(parentOne, parentTwo) {
+  // Fill empty seats by 'EMPTY_NUMBER'
+  for (let i = 0, j = 1; i < parentOne.length; i++) {
+    if (parentOne[i][3].length === 0) {
+      parentOne[i][3][0] = `EMPTY_${j}`
+      j++;
+    }
+  }
 
-  // Generate 2 breakpoints
-  const [breakPoint1, breakPoint2] = generateBreakpoints(parent1Length);
+  for (let i = 0, j = 1; i < parentOne.length; i++) {
+    if (parentTwo[i][3].length === 0) {
+      parentTwo[i][3][0] = `EMPTY_${j}`
+      j++;
+    }
+  }
 
-  // STACKOVERFLOW ANSWER
-  // https://stackoverflow.com/questions/60320147/handling-duplicates-when-using-partially-matched-crossover-for-genetic-algorithm
+  const geneLength = parentOne.length;
 
-  // Create mappings for both offspring to keep track of which students are already in it.
-  // const offspring1Present = {};
-  // const offspring2Present = {};
-  // const mappingSystem = {};
+  // Initialize offspring using room details
+  const offspring = parentOne.map((seat) => [seat[0], seat[1], seat[2], []]);
 
-  // Insert genes from parent 1 to offspring 1 between breakpoints
-  // Insert genes from parent 2 to offspring 2 between breakpoints
-  // for (let i = breakPoint1; i <= breakPoint2; i++) {
-  //   // Exchange students between breakpoint section
-  //   offspring1[i] = parent2[i];
-  //   offspring2[i] = parent1[i];
+  // Generate breakpoints for random segment
+  const [x, y] = generateBreakpoints(geneLength);
 
-  //   // Keep mapping between students of the two parents which belong to breakpoint section
-  //   const studentInParent1 = parent1[i][3].length === 0 ? [] : parent1[i][3][0];
-  //   const studentInParent2 = parent2[i][3].length === 0 ? [] : parent2[i][3][0];
-  //   mappingSystem[studentInParent1] = studentInParent2
-  //   mappingSystem[studentInParent2] = studentInParent1
+  // Keep track of elements in offspring
+  const elementsInOffspring = {};
 
-  //   // Keep track of which student is already present in offspring
-  //   if (offspring1[i][3].length !== 0) offspring1Present[offspring1[i][3][0]] = 1;
-  //   if (offspring2[i][3].length !== 0) offspring2Present[offspring2[i][3][0]] = 1;
-  // }
+  // Element and their index in parent two
+  const elementMappingPTwo = {};
 
-  // for (let i = 0; i < parent1Length; i++) {
-  //   if (i >= breakPoint1 && i <= breakPoint2) continue;
-  //   // If no conflicts, populate offspring1
-  //   if (parent1[i][3].length !== 0 && offspring1Present[parent1[i][3][0]] === 1) {
-  //     // Conflict as gene is already present in offspring
-  //     var conflict = parent1[i][3][0];
-  //     var mapping = mappingSystem[conflict];
-  //     while (offspring1Present[mapping] === 1) {
-  //       // Mapped element is also already present
-  //       console.log(conflict, mapping)
-  //       conflict = mapping;
-  //       mapping = mappingSystem[conflict];
-  //     }
-  //     offspring1[i] = mapping;
-  //     offspring1Present[mapping] = 1;
-  //     continue;
-  //   };
-  //   offspring1[i] = parent1[i];
-  // }
-  // for (let i = 0; i < parent2Length; i++) {
-  //   if (i >= breakPoint1 && i <= breakPoint2) continue;
-  //   // Populate offspring2 in same way
-  //   if (parent2[i][3].length !== 0 && offspring2Present[parent2[i][3][0]] === 1) continue;
-  //   offspring2[i] = parent2[i];
-  // }
+  // Copy elements from parent one to offspring in x to y
+  for (let i = x; i <= y; i++) {
+    offspring[i][3] = parentOne[i][3];
+    elementsInOffspring[parentOne[i][3][0]] = i;
+  }
+
+  // Get element and their position in parentTwo
+  for (let i = 0; i < geneLength; i++)
+    elementMappingPTwo[parentTwo[i][3][0]] = i;
+
+  // Crossover
+  for (let i = x; i <= y; i++) {
+    if (elementsInOffspring[parentTwo[i][3][0]] !== undefined) {
+      continue;
+    }
+
+    let j = i;
+    while (j >= x && j <= y) {
+      j = elementMappingPTwo[parentOne[j][3][0]];
+    }
+    offspring[j][3] = parentTwo[i][3];
+    elementsInOffspring[offspring[j][3][0]] = j;
+  }
+
+  // Fill in the remaining genes from parentTwo
+  // Part one, before breakpoint x
+  let offspringIndex = 0, parentTwoIndex = 0;
+  while (offspringIndex < x) {
+    // Gene is not empty
+    if (offspring[offspringIndex][3].length !== 0) {
+      offspringIndex++;
+      continue;
+    }
+    if (elementsInOffspring[parentTwo[parentTwoIndex][3][0]] !== undefined) {
+      // Already present in offspring
+      parentTwoIndex++;
+    } else {
+      // Not present in offspring
+      offspring[offspringIndex][3] = parentTwo[parentTwoIndex][3];
+      elementsInOffspring[offspring[offspringIndex][3][0]] = offspringIndex;
+      offspringIndex++;
+      parentTwoIndex++;
+    }
+  }
+
+  // Part two, after breakpoint x
+  offspringIndex = y + 1;
+  while (offspringIndex < geneLength) {
+    // Check if empty
+    if (offspring[offspringIndex][3].length !== 0) {
+      offspringIndex++;
+      continue;
+    }
+    if (elementsInOffspring[parentTwo[parentTwoIndex][3][0]] !== undefined) {
+      // Already present in offspring
+      parentTwoIndex++;
+    } else {
+      // Not present in offspring
+      offspring[offspringIndex][3] = parentTwo[parentTwoIndex][3];
+      elementsInOffspring[offspring[offspringIndex][3][0]] = offspringIndex;
+      offspringIndex++;
+      parentTwoIndex++;
+    }
+  }
+
+  // Replace 'EMPTY_NUMBER' by empty array in array
+  for (let i = 0; i < geneLength; i++) {
+    if (parentOne[i][3].length === 1)
+      parentOne[i][3] = [];
+    if (parentTwo[i][3].length === 1)
+      parentTwo[i][3] = [];
+    if (offspring[i][3].length === 1)
+      offspring[i][3] = [];
+  }
+
+  return offspring
 }
 
 module.exports = {
   orderOneCrossover,
-  alternatingCrossover
+  alternatingCrossover,
+  partiallyMappedCrossover
 }
