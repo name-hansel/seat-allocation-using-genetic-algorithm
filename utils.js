@@ -12,6 +12,7 @@ function shuffleChromosome(chromosome) {
   }
   return returnChromosome;
 }
+
 /**
  * Shuffles a population and returns the shuffled population
  * @param {array} population Population to be shuffled

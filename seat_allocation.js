@@ -9,7 +9,7 @@ const { orderOneCrossover, alternatingCrossover, partiallyMappedCrossover } = re
 const { swapMutation, scrambleMutation, inversionMutation } = require("./mutation");
 
 const POPULATION_SIZE = 300;
-const GENERATION_LIMIT = 1000;
+const GENERATION_LIMIT = 300;
 const MUTATION_RATE = 0.03;
 
 // Read subject details from csv file
@@ -87,7 +87,8 @@ function fitnessValue(chromosome) {
 
     // Get neighbours of a particular seat
     var neighbours = [[row - 1, column], [row, column - 1], [row, column + 1], [row + 1, column],
-    [row - 1, column + 1], [row - 1, column - 1], [row + 1, column - 1], [row + 1, column + 1]];
+    [row - 1, column + 1], [row - 1, column - 1], [row + 1, column - 1], [row + 1, column + 1]
+    ];
     var validNeighbours = neighbours.filter(neighbour => isValidNeighbour(neighbour, currentRoomDimensions));
 
     // Get subject details of each neighbour
@@ -110,11 +111,11 @@ function fitnessValue(chromosome) {
       return fitness
     })
 
-    // Return average of 8 neighbours for each seat
-    return getArraySum(geneFitness) / 8;
+    // Return minimum of 8 neighbours for each seat
+    return minimumFitness(geneFitness);
   })
 
-  const fitness = getArraySum(fitnessForEachGene) / numberOfSeats;
+  const fitness = Math.pow(getArraySum(fitnessForEachGene) / numberOfSeats, 2);
 
   return { solution: chromosome, fitness }
 }
@@ -122,21 +123,21 @@ function fitnessValue(chromosome) {
 currentGeneration = 1;
 // Start iterating through generations
 while (currentGeneration <= GENERATION_LIMIT) {
-  console.log(`Generation: ${currentGeneration}`)
+  // console.log(`Generation: ${currentGeneration}`)
 
   // Calculate fitness of each chromosome (solution) in population and store
   const populationWithCalculatedFitness = population.map(solution => fitnessValue(solution))
 
   // Calculate average fitness for a generation and print it
-  // const averageGenerationFitness = calculateAverageFitnessForGeneration(populationWithCalculatedFitness, POPULATION_SIZE)
-  // console.log(`Generation: ${currentGeneration}\nAverage fitness: ${averageGenerationFitness}`)
+  const averageGenerationFitness = calculateAverageFitnessForGeneration(populationWithCalculatedFitness, POPULATION_SIZE)
+  console.log(`Generation: ${currentGeneration}\nAverage fitness: ${averageGenerationFitness}`)
 
   // Sort solutions in a population based on fitness
   populationWithCalculatedFitness.sort((a, b) => {
     return b.fitness - a.fitness;
   })
 
-  // Add to graphPoints object
+  // Add to graphPoints object (max fitness)
   graphPoints.push({
     generation: currentGeneration,
     fitness: populationWithCalculatedFitness[0].fitness
@@ -144,7 +145,7 @@ while (currentGeneration <= GENERATION_LIMIT) {
 
   // Build a mating pool using any selection method
   const [matingPool, nextPopulation] = elitismSelection(populationWithCalculatedFitness, 20, POPULATION_SIZE);
-  // const [matingPool, nextPopulation] = rouletteWheelSelection(populationWithCalculatedFitness, POPULATION_SIZE/5, POPULATION_SIZE);
+  // const [matingPool, nextPopulation] = rouletteWheelSelection(populationWithCalculatedFitness, POPULATION_SIZE / 5, POPULATION_SIZE);
   // const [matingPool, nextPopulation] = tournamentSelection(populationWithCalculatedFitness, POPULATION_SIZE / 5, POPULATION_SIZE);
 
   // While next population is not full, keep generating offsprings using random parents from mating pool
@@ -155,6 +156,10 @@ while (currentGeneration <= GENERATION_LIMIT) {
     // Crossover using first 2 elements of shuffled mating pool
     const offspringA = orderOneCrossover(copyMatingPool[0], copyMatingPool[1], roomDetails, emptySeats);
     const offspringB = orderOneCrossover(copyMatingPool[1], copyMatingPool[0], roomDetails, emptySeats);
+    // const offspringA = partiallyMappedCrossover(copyMatingPool[0], copyMatingPool[1]);
+    // const offspringB = partiallyMappedCrossover(copyMatingPool[1], copyMatingPool[0]);
+    // const offspringA = alternatingCrossover(copyMatingPool[0], copyMatingPool[1], emptySeats);
+    // const offspringB = alternatingCrossover(copyMatingPool[1], copyMatingPool[0], emptySeats);
 
     // Mutate offspring 1 and 2 here
     const mutatedOffspringA = swapMutation(offspringA, MUTATION_RATE);
@@ -164,7 +169,7 @@ while (currentGeneration <= GENERATION_LIMIT) {
   }
 
   // Clear previous population
-  population.length = 0
+  population.length = 0;
 
   // Add all offsprings to the population
   population.push(...nextPopulation);
