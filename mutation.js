@@ -104,14 +104,8 @@ function inversionMutation(chromosome, mutationRate) {
   ];
 }
 
-
-function insertionMutation() {
-  // 1(2)34(5)6789 -> 125346789
-}
-
 module.exports = {
   swapMutation,
   scrambleMutation,
-  insertionMutation,
   inversionMutation
 }

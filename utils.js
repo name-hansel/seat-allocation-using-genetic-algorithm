@@ -77,7 +77,7 @@ function getNumberOfSeats(data) {
  * @param {array} v2 Array containing row and column number of seat 2
  */
 function getDistanceBetweenNeighbours(v1, v2) {
-  return Math.pow((v1[0] - v2[0]), 2) + Math.pow((v1[1] - v2[1]), 2);
+  return Math.sqrt(Math.pow((v1[0] - v2[0]), 2) + Math.pow((v1[1] - v2[1]), 2));
 }
 
 /**
@@ -232,6 +232,7 @@ function minimumFitness(fitness) {
   }
   return min;
 }
+
 
 module.exports = {
   shuffleChromosome,

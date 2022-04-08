@@ -8,9 +8,9 @@ const { elitismSelection, rouletteWheelSelection, tournamentSelection } = requir
 const { orderOneCrossover, alternatingCrossover, partiallyMappedCrossover } = require("./crossover");
 const { swapMutation, scrambleMutation, inversionMutation } = require("./mutation");
 
-const POPULATION_SIZE = 300;
-const GENERATION_LIMIT = 300;
-const MUTATION_RATE = 0.03;
+const POPULATION_SIZE = 500;
+const GENERATION_LIMIT = 2000;
+const MUTATION_RATE = 0.05;
 
 // Read subject details from csv file
 var csv = fs.readFileSync("subject_details.csv");
@@ -82,6 +82,8 @@ function fitnessValue(chromosome) {
     const column = gene[2];
     const student = gene[3];
 
+    const denominator = Math.sqrt(((Math.pow(Number(currentRoomDimensions[0]), 2)) + Math.pow(Number(currentRoomDimensions[1]), 2)));
+
     // Check if seat is unoccupied
     if (isSeatEmpty(gene)) return 0;
 
@@ -96,17 +98,17 @@ function fitnessValue(chromosome) {
 
     // Iterate through neighbours and calculate fitness for each neighbour
     const geneFitness = validNeighbours.map(neighbour => {
-      // Check if neighbour is empty
-      if (isSeatEmpty(neighbour)) return 0;
-
       // Calculate distance between each neighbour
       const distance = getDistanceBetweenNeighbours([row, column], [neighbour[1], neighbour[2]])
+
+      // Check if neighbour is empty
+      if (isSeatEmpty(neighbour)) return (distance * 1) / denominator
 
       // Calculate subject similarity
       const subjectDissimilarity = subjectDissimilarityData[student[1]][neighbour[3][1]];
 
       // Calculate fitness
-      const fitness = (distance * subjectDissimilarity) / ((Math.pow(Number(currentRoomDimensions[0]), 2)) + Math.pow(Number(currentRoomDimensions[1]), 2));
+      const fitness = 100 * (distance * subjectDissimilarity) / denominator
 
       return fitness
     })
@@ -115,9 +117,9 @@ function fitnessValue(chromosome) {
     return minimumFitness(geneFitness);
   })
 
-  const fitness = Math.pow(getArraySum(fitnessForEachGene) / numberOfSeats, 2);
+  const fitness = getArraySum(fitnessForEachGene) / numberOfSeats;
 
-  return { solution: chromosome, fitness }
+  return { solution: chromosome, fitness: Math.pow(fitness, 2) }
 }
 
 currentGeneration = 1;
@@ -128,9 +130,12 @@ while (currentGeneration <= GENERATION_LIMIT) {
   // Calculate fitness of each chromosome (solution) in population and store
   const populationWithCalculatedFitness = population.map(solution => fitnessValue(solution))
 
+  const currentMutationRate = MUTATION_RATE
+
   // Calculate average fitness for a generation and print it
   const averageGenerationFitness = calculateAverageFitnessForGeneration(populationWithCalculatedFitness, POPULATION_SIZE)
-  console.log(`Generation: ${currentGeneration}\nAverage fitness: ${averageGenerationFitness}`)
+  console.log(`${currentGeneration} - Average fitness: ${averageGenerationFitness} - MR = ${currentMutationRate
+    }`)
 
   // Sort solutions in a population based on fitness
   populationWithCalculatedFitness.sort((a, b) => {
@@ -162,8 +167,8 @@ while (currentGeneration <= GENERATION_LIMIT) {
     // const offspringB = alternatingCrossover(copyMatingPool[1], copyMatingPool[0], emptySeats);
 
     // Mutate offspring 1 and 2 here
-    const mutatedOffspringA = swapMutation(offspringA, MUTATION_RATE);
-    const mutatedOffspringB = swapMutation(offspringB, MUTATION_RATE);
+    const mutatedOffspringA = swapMutation(offspringA, currentMutationRate);
+    const mutatedOffspringB = swapMutation(offspringB, currentMutationRate);
 
     nextPopulation.push(mutatedOffspringA, mutatedOffspringB);
   }
