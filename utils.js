@@ -77,7 +77,7 @@ function getNumberOfSeats(data) {
  * @param {array} v2 Array containing row and column number of seat 2
  */
 function getDistanceBetweenNeighbours(v1, v2) {
-  return Math.sqrt(Math.pow((v1[0] - v2[0]), 2) + Math.pow((v1[1] - v2[1]), 2));
+  return Math.pow(v1[0] - v2[0], 2) + Math.pow(v1[1] - v2[1], 2);
 }
 
 /**
@@ -186,6 +186,15 @@ function calculateAverageFitnessForGeneration(population, POPULATION_SIZE) {
   return totalGenerationFitness / POPULATION_SIZE;
 }
 
+function calculateMaximumFitnessForGeneration(population, POPULATION_SIZE) {
+  var maxFitness = population[0].fitness;
+  for (let i = 1; i < POPULATION_SIZE; i++) {
+    if (population[i].fitness > maxFitness)
+      maxFitness = population[i].fitness
+  }
+  return maxFitness
+}
+
 function getAverageNumberOfSubjectsPerRoom(chromosome, numberOfRooms) {
   // Get average number of subjects in each room
   var currentRoom = chromosome[0][0];
@@ -248,6 +257,7 @@ module.exports = {
   shuffleMatingPool,
   generateBreakpoints,
   calculateAverageFitnessForGeneration,
+  calculateMaximumFitnessForGeneration,
   getAverageNumberOfSubjectsPerRoom,
   printLayout,
   minimumFitness
