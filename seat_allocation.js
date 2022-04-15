@@ -168,6 +168,10 @@ while (currentGeneration <= GENERATION_LIMIT) {
     // Mutate offspring 1 and 2 here
     const mutatedOffspringA = swapMutation(offspringA, MUTATION_RATE);
     const mutatedOffspringB = swapMutation(offspringB, MUTATION_RATE);
+    // const mutatedOffspringA = scrambleMutation(offspringA, MUTATION_RATE);
+    // const mutatedOffspringB = scrambleMutation(offspringB, MUTATION_RATE);
+    // const mutatedOffspringA = inversionMutation(offspringA, MUTATION_RATE);
+    // const mutatedOffspringB = inversionMutation(offspringB, MUTATION_RATE);
 
     nextPopulation.push(mutatedOffspringA, mutatedOffspringB);
   }
