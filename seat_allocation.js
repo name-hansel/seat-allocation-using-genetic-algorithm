@@ -10,7 +10,7 @@ const { swapMutation, scrambleMutation, inversionMutation } = require("./mutatio
 
 const POPULATION_SIZE = 750;
 const GENERATION_LIMIT = 1000;
-const MUTATION_RATE = 0.06;
+const MUTATION_RATE = 0.08;
 
 // Read subject details from csv file
 var csv = fs.readFileSync("subject_details.csv");
