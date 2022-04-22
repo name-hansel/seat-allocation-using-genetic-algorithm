@@ -8,7 +8,7 @@ function elitismSelection(population, percentageOfElite, POPULATION_SIZE) {
   const matingPool = [];
   const newPopulation = [];
 
-  const numberOfParentsToCarryOver = parseInt((percentageOfElite / 100) * POPULATION_SIZE);
+  let numberOfParentsToCarryOver = parseInt((percentageOfElite / 100) * POPULATION_SIZE);
 
   // If number of parents is 1, increment by 1 since crossover needs at least 2 parents
   if (numberOfParentsToCarryOver === 1) numberOfParentsToCarryOver++;

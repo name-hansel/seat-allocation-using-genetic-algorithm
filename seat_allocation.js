@@ -199,4 +199,8 @@ for (let i = 0; i < POPULATION_SIZE; i++) {
 
 console.log(bestSolution.fitness);
 printLayout(bestSolution.solution, roomDetails.data);
-console.timeEnd("start")
+
+for (let i = 0; i < graphPoints.length; i++)
+  console.log(graphPoints[i]);
+
+console.timeEnd("start");
